@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "168416389868",
+    "project_id": "imuka-kigali",
+    "storage_bucket": "imuka-kigali.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168416389868:android:e997861f4f6c45d939d3c9",
+        "android_client_info": {
+          "package_name": "com.imuka.imuka_kigali"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "168416389868-jha94innrabnsrm9vhamuark2q2cqvn7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imuka.imuka_kigali",
+            "certificate_hash": "47dea9654fb5a53e4e3d68814bb8e9b8734b8fce"
+          }
+        },
+        {
+          "client_id": "168416389868-mho791gsgqall33v6nfqto6rmpem0svo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnrCbuyWJx4bKpqIJSa5McwsShOcor11w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "168416389868-mho791gsgqall33v6nfqto6rmpem0svo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
