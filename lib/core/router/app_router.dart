@@ -1,4 +1,4 @@
-/// setup routes  one route per screen; clients and drivers land on different home screens
+// setup routes  one route per screen; clients and drivers land on different home screens
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
