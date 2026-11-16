@@ -1,18 +1,19 @@
-
-
+// Owner: Member 2
+// VehicleRepositoryImpl implements VehicleRepository using the 'vehicles' collection.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:imuka_kigali/core/constants/firestore_constants.dart';
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 
-import '../../core/constants/firestore_constants.dart';
-import '../../domain/entities/vehicle.dart';
-import '../../domain/repositories/vehicle_repository.dart';
-
+/// The Firestore code for vehicles. Only this layer imports Firebase.
 class VehicleRepositoryImpl implements VehicleRepository {
-  // The app calls VehicleRepositoryImpl() with nothing.
-  // A test can pass in fake Firestore and FirebaseAuth objects instead.
+  /// Creates the repository. The app passes nothing, so the real Firebase
+  /// is used. A test can pass fake [db] and [auth] objects instead.
   VehicleRepositoryImpl({FirebaseFirestore? db, FirebaseAuth? auth})
-      : _db = db ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+    : _db = db ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
@@ -21,25 +22,26 @@ class VehicleRepositoryImpl implements VehicleRepository {
   CollectionReference<Map<String, dynamic>> get _vehicles =>
       _db.collection(Collections.vehicles);
 
+  /// Creates a vehicle document owned by the signed-in driver.
+  /// The capacity is filled in from the chosen vehicle type.
+  /// Throws an Exception with a readable message if nobody is signed in
+  /// or Firestore refuses the write.
   @override
   Future<Vehicle> addVehicle({
-    required VehicleType vehicleType,
+    required String vehicleType,
     required String plateNumber,
-    required List<String> operatingHubs,
   }) async {
     final driverId = _auth.currentUser?.uid;
     if (driverId == null) {
       throw Exception('Please log in again before adding a vehicle.');
     }
 
-    // Build the vehicle first (no id yet), then turn it into a Map.
     final data = Vehicle(
       id: '',
       driverId: driverId,
       vehicleType: vehicleType,
       plateNumber: plateNumber,
-      capacityKg: vehicleType.capacityKg,
-      operatingHubs: operatingHubs,
+      capacityKg: VehicleClasses.of(vehicleType).capacityKg,
     ).toMap();
 
     try {
@@ -51,6 +53,8 @@ class VehicleRepositoryImpl implements VehicleRepository {
     }
   }
 
+  /// Looks for the one vehicle whose driverId equals [driverId].
+  /// Returns null when the driver has no vehicle.
   @override
   Future<Vehicle?> getVehicle(String driverId) async {
     try {
@@ -59,7 +63,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
           .limit(1)
           .get();
       if (snapshot.docs.isEmpty) {
-        return null; // This driver has no vehicle yet.
+        return null;
       }
       final doc = snapshot.docs.first;
       return Vehicle.fromMap(doc.id, doc.data());
@@ -68,6 +72,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
     }
   }
 
+  /// Writes every field of [vehicle] over the document with the same id.
   @override
   Future<void> updateVehicle(Vehicle vehicle) async {
     try {
@@ -77,6 +82,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
     }
   }
 
+  /// Removes the vehicle document with the id [vehicleId].
   @override
   Future<void> deleteVehicle(String vehicleId) async {
     try {
@@ -86,7 +92,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
     }
   }
 
-  /// Turns Firebase's technical errors into sentences a driver understands.
+  /// Turns a Firebase error code into a sentence a driver can understand.
   String _friendlyMessage(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':

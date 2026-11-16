@@ -1,25 +1,25 @@
+// Owner: Member 2
+// abstract class VehicleRepository: addVehicle, getVehicle, updateVehicle, deleteVehicle.
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
 
-// The "what" for vehicles: the list of things the app can do with them.
-// The "how" (Firestore) is in data/repositories/vehicle_repository_impl.dart.
-
-import '../entities/vehicle.dart';
-
+/// The list of things the app can do with vehicles.
+/// The Firestore code behind each method is in
+/// data/repositories/vehicle_repository_impl.dart.
 abstract class VehicleRepository {
-  /// CREATE: saves a new vehicle for the driver who is signed in right now,
-  /// and returns it with its new Firestore id.
+  /// Saves a new vehicle for the driver who is signed in, and returns it
+  /// with its new Firestore id.
   Future<Vehicle> addVehicle({
-    required VehicleType vehicleType,
+    required String vehicleType,
     required String plateNumber,
-    required List<String> operatingHubs,
   });
 
-  /// READ: the vehicle that belongs to [driverId], or null if they have none.
-  /// Teammates can use this too, e.g. to show a bidding driver's vehicle.
+  /// Returns the vehicle that belongs to [driverId], or null if that driver
+  /// has not registered one.
   Future<Vehicle?> getVehicle(String driverId);
 
-  /// UPDATE: saves the changed vehicle over the old one.
+  /// Saves the changed [vehicle] over the one already in Firestore.
   Future<void> updateVehicle(Vehicle vehicle);
 
-  /// DELETE: removes the vehicle document.
+  /// Deletes the vehicle document with the id [vehicleId].
   Future<void> deleteVehicle(String vehicleId);
 }
