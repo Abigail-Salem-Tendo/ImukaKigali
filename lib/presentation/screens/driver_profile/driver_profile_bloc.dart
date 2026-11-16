@@ -1,34 +1,33 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../domain/entities/vehicle.dart';
-import '../../../domain/repositories/vehicle_repository.dart';
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 
 part 'driver_profile_event.dart';
 part 'driver_profile_state.dart';
 
+/// The logic of the driver profile. It loads the driver's vehicle and
+/// creates, updates and deletes it through VehicleRepository.
 class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
+  /// Creates the bloc with nothing loaded and links each event to the
+  /// method that handles it.
   DriverProfileBloc(this._repo) : super(const DriverProfileState()) {
     on<DriverProfileRequested>(_onRequested);
     on<DriverVehicleTypeChanged>(_onVehicleTypeChanged);
     on<DriverPlateNumberChanged>(_onPlateNumberChanged);
-    on<DriverHubToggled>(_onHubToggled);
     on<DriverVehicleAdded>(_onVehicleAdded);
     on<DriverVehicleDeleted>(_onVehicleDeleted);
   }
 
   final VehicleRepository _repo;
 
-  /// Remembers the hubs of a deleted vehicle, so a re-added vehicle keeps them.
-  List<String> _lastHubs = const [];
-
-  // ------------------------------- READ -------------------------------
-
+  /// Loads the driver's vehicle from Firestore. The status becomes
+  /// success (the vehicle may be null), or failure with a message.
   Future<void> _onRequested(
-      DriverProfileRequested event,
-      Emitter<DriverProfileState> emit,
-      ) async {
+    DriverProfileRequested event,
+    Emitter<DriverProfileState> emit,
+  ) async {
     emit(state.copyWith(status: DriverProfileStatus.loading));
     try {
       final vehicle = await _repo.getVehicle(event.driverId);
@@ -50,12 +49,12 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     }
   }
 
-  // ------------------------------ UPDATE ------------------------------
-
+  /// Changes the vehicle's type and sets its capacity to match the new
+  /// type. Nothing happens if there is no vehicle or the type is the same.
   Future<void> _onVehicleTypeChanged(
-      DriverVehicleTypeChanged event,
-      Emitter<DriverProfileState> emit,
-      ) async {
+    DriverVehicleTypeChanged event,
+    Emitter<DriverProfileState> emit,
+  ) async {
     final current = state.vehicle;
     if (current == null || current.vehicleType == event.vehicleType) {
       return;
@@ -65,22 +64,22 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
       previous: current,
       updated: current.copyWith(
         vehicleType: event.vehicleType,
-        capacityKg: event.vehicleType.capacityKg,
+        capacityKg: VehicleClasses.of(event.vehicleType).capacityKg,
       ),
       successMessage: 'Vehicle class updated.',
     );
   }
 
+  /// Changes the vehicle's plate number after checking that it has a
+  /// Rwanda plate's shape. A wrong plate shows an error and saves nothing.
   Future<void> _onPlateNumberChanged(
-      DriverPlateNumberChanged event,
-      Emitter<DriverProfileState> emit,
-      ) async {
+    DriverPlateNumberChanged event,
+    Emitter<DriverProfileState> emit,
+  ) async {
     final current = state.vehicle;
     if (current == null) {
       return;
     }
-    // Check the plate here too, not only in the dialog. The bloc is the
-    // place where the rules live.
     if (!isValidRwandaPlate(event.plateNumber)) {
       _fail(emit, 'Enter a Rwanda plate like RAD 428 E.');
       return;
@@ -97,53 +96,23 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     );
   }
 
-  Future<void> _onHubToggled(
-      DriverHubToggled event,
-      Emitter<DriverProfileState> emit,
-      ) async {
-    final current = state.vehicle;
-    if (current == null) {
-      return;
-    }
-    final hubs = [...current.operatingHubs];
-    if (hubs.contains(event.hub)) {
-      if (hubs.length <= 2) {
-        _fail(emit, 'Keep at least 2 hubs so you still get nearby moves.');
-        return;
-      }
-      hubs.remove(event.hub);
-    } else {
-      hubs.add(event.hub);
-    }
-    // No success message here: a snackbar on every chip tap would be noisy.
-    await _saveChange(
-      emit,
-      previous: current,
-      updated: current.copyWith(operatingHubs: hubs),
-    );
-  }
-
-  /// Shows the change AT ONCE (so the app feels instant), then saves it.
-  /// If saving fails, it puts the old vehicle back and shows an error.
+  /// Shows [updated] on the screen at once, then saves it in Firestore.
+  /// If the save fails, it puts [previous] back and reports the error.
   Future<void> _saveChange(
-      Emitter<DriverProfileState> emit, {
-        required Vehicle previous,
-        required Vehicle updated,
-        String? successMessage,
-      }) async {
-    emit(
-      state.copyWith(status: DriverProfileStatus.success, vehicle: updated),
-    );
+    Emitter<DriverProfileState> emit, {
+    required Vehicle previous,
+    required Vehicle updated,
+    required String successMessage,
+  }) async {
+    emit(state.copyWith(status: DriverProfileStatus.success, vehicle: updated));
     try {
       await _repo.updateVehicle(updated);
-      if (successMessage != null) {
-        emit(
-          state.copyWith(
-            status: DriverProfileStatus.success,
-            message: successMessage,
-          ),
-        );
-      }
+      emit(
+        state.copyWith(
+          status: DriverProfileStatus.success,
+          message: successMessage,
+        ),
+      );
     } catch (error) {
       emit(
         state.copyWith(
@@ -155,12 +124,12 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     }
   }
 
-  // ------------------------------ CREATE ------------------------------
-
+  /// Creates a vehicle for a driver who has none. isSaving is true while
+  /// the save runs, so the button can show a spinner.
   Future<void> _onVehicleAdded(
-      DriverVehicleAdded event,
-      Emitter<DriverProfileState> emit,
-      ) async {
+    DriverVehicleAdded event,
+    Emitter<DriverProfileState> emit,
+  ) async {
     if (state.vehicle != null || state.isSaving) {
       return;
     }
@@ -169,7 +138,6 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
       final vehicle = await _repo.addVehicle(
         vehicleType: event.vehicleType,
         plateNumber: formatRwandaPlate(event.plateNumber),
-        operatingHubs: _lastHubs,
       );
       emit(
         state.copyWith(
@@ -190,23 +158,20 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     }
   }
 
-  // ------------------------------ DELETE ------------------------------
-
+  /// Removes the vehicle from the screen at once, then deletes it from
+  /// Firestore. If the delete fails, it brings the vehicle back.
   Future<void> _onVehicleDeleted(
-      DriverVehicleDeleted event,
-      Emitter<DriverProfileState> emit,
-      ) async {
+    DriverVehicleDeleted event,
+    Emitter<DriverProfileState> emit,
+  ) async {
     final current = state.vehicle;
     if (current == null) {
       return;
     }
-    _lastHubs = current.operatingHubs;
-    // Remove it from the screen at once...
     emit(
       state.copyWith(status: DriverProfileStatus.success, clearVehicle: true),
     );
     try {
-      // ...then from Firestore.
       await _repo.deleteVehicle(current.id);
       emit(
         state.copyWith(
@@ -215,7 +180,6 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
         ),
       );
     } catch (error) {
-      // Deleting failed, so bring the vehicle back.
       emit(
         state.copyWith(
           status: DriverProfileStatus.failure,
@@ -226,19 +190,16 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     }
   }
 
-  // ------------------------------ HELPERS -----------------------------
-
-  /// Shows [message] in a snackbar without changing anything.
-  ///
-  /// The screen shows a snackbar when the status CHANGES to failure.
-  /// Emitting "success" first makes sure that change happens, even if the
-  /// last state was already a failure (e.g. two wrong taps in a row).
+  /// Reports [message] as an error without changing the vehicle.
+  /// The screen shows a snackbar when the status turns into failure, so a
+  /// success state is emitted first to make sure that change happens even
+  /// when the previous state was already a failure.
   void _fail(Emitter<DriverProfileState> emit, String message) {
     emit(state.copyWith(status: DriverProfileStatus.success));
     emit(state.copyWith(status: DriverProfileStatus.failure, error: message));
   }
 
-  /// "Exception: No internet" -> "No internet"
+  /// Removes the "Exception: " prefix so the driver sees a clean sentence.
   String _readable(Object error) {
     return error.toString().replaceFirst('Exception: ', '');
   }
