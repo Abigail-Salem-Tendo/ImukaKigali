@@ -4,46 +4,56 @@ import 'package:equatable/equatable.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/core/utils/date_parser.dart';
 
-class Payment extends Equatable {
-  const Payment({
+class Rating extends Equatable {
+  const Rating({
     required this.id,
     required this.requestId,
-    required this.amount,
-    required this.method,
-    required this.status,
-    this.paidAt,
+    required this.clientId,
+    required this.driverId,
+    required this.stars,
+    required this.comment,
+    required this.createdAt,
   });
 
   final String id;
   final String requestId;
-  final double amount;
-  final String method;
-  final String status; // PaymentStatus.pending or PaymentStatus.paid
+  final String clientId;
+  final String driverId;
+  final int stars;
+  final String comment;
+  final DateTime createdAt;
 
-  /// Null until the payment is marked paid.
-  final DateTime? paidAt;
-
-  factory Payment.fromMap(String id, Map<String, dynamic> map) {
-    return Payment(
+  factory Rating.fromMap(String id, Map<String, dynamic> map) {
+    return Rating(
       id: id,
       requestId: map[Fields.requestId] as String? ?? '',
-      amount: (map[Fields.amount] as num?)?.toDouble() ?? 0,
-      method: map[Fields.method] as String? ?? '',
-      status: map[Fields.status] as String? ?? PaymentStatus.pending,
-      paidAt: parseDate(map[Fields.paidAt]),
+      clientId: map[Fields.clientId] as String? ?? '',
+      driverId: map[Fields.driverId] as String? ?? '',
+      stars: (map[Fields.stars] as num?)?.toInt() ?? 0,
+      comment: map[Fields.comment] as String? ?? '',
+      createdAt: parseDate(map[Fields.createdAt]) ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       Fields.requestId: requestId,
-      Fields.amount: amount,
-      Fields.method: method,
-      Fields.status: status,
-      Fields.paidAt: paidAt,
+      Fields.clientId: clientId,
+      Fields.driverId: driverId,
+      Fields.stars: stars,
+      Fields.comment: comment,
+      Fields.createdAt: createdAt,
     };
   }
 
   @override
-  List<Object?> get props => [id, requestId, amount, method, status, paidAt];
+  List<Object?> get props => [
+    id,
+    requestId,
+    clientId,
+    driverId,
+    stars,
+    comment,
+    createdAt,
+  ];
 }
