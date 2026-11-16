@@ -1,15 +1,11 @@
-
-// The cards that make up the driver profile (Figma frame: "Driver Profile").
-// Each one only DRAWS. Taps are passed back to the screen through callbacks,
-// and the screen sends the matching event to DriverProfileBloc.
-
 import 'package:flutter/material.dart';
+import 'package:imuka_kigali/core/theme/app_spacing.dart';
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step2/vehicle_type_card.dart';
 
-import '../../../core/theme/app_spacing.dart';
-import '../../../domain/entities/vehicle.dart';
-import '../driver_registration_step2/vehicle_type_card.dart';
-
-/// "+250788452910" -> "+250 788 452 910" (anything else is shown as it is).
+/// Writes a saved phone number with spaces: "+250788452910" becomes
+/// "+250 788 452 910". Any other text is returned unchanged.
 String _formatPhone(String phone) {
   final digits = phone.replaceAll(RegExp(r'\D'), '');
   if (digits.length != 12 || !digits.startsWith('250')) {
@@ -19,8 +15,11 @@ String _formatPhone(String phone) {
       '${digits.substring(9)}';
 }
 
-/// The top card: green banner, initials, "ACTIVE DRIVER", name and contacts.
+/// The card at the top of the profile: a coloured banner with the
+/// driver's initials, then their name, phone and email.
 class ProfileHeaderCard extends StatelessWidget {
+  /// Creates the card. When [onEditPressed] is null the Edit button is
+  /// hidden.
   const ProfileHeaderCard({
     super.key,
     required this.fullName,
@@ -32,11 +31,10 @@ class ProfileHeaderCard extends StatelessWidget {
   final String fullName;
   final String phone;
   final String email;
-
-  /// Null hides the Edit button (there is nothing to edit without a vehicle).
   final VoidCallback? onEditPressed;
 
-  /// "Jean-Claude Mugisha" -> "JM"
+  /// Returns the first letters of the first two names:
+  /// "Jean-Claude Mugisha" becomes "JM".
   String get _initials {
     final words = fullName.trim().split(RegExp(r'\s+'));
     return words
@@ -46,6 +44,8 @@ class ProfileHeaderCard extends StatelessWidget {
         .join();
   }
 
+  /// Draws the banner, the name row with the Edit button, and the
+  /// contact box.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -59,7 +59,7 @@ class ProfileHeaderCard extends StatelessWidget {
         children: [
           Container(
             color: colors.primary,
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: AppSpacing.cardInsets,
             child: Row(
               children: [
                 CircleAvatar(
@@ -86,7 +86,7 @@ class ProfileHeaderCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: AppSpacing.cardInsets,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -115,7 +115,7 @@ class ProfileHeaderCard extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
                     color: colors.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Column(
                     children: [
@@ -137,18 +137,21 @@ class ProfileHeaderCard extends StatelessWidget {
   }
 }
 
+/// One line of contact details: an icon followed by text.
 class _ContactRow extends StatelessWidget {
+  /// Creates the row with its icon and text.
   const _ContactRow({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
 
+  /// Draws the icon and the text. Long text is cut with "…".
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: AppSpacing.md, color: theme.colorScheme.primary),
+        Icon(icon, size: AppSpacing.iconSm, color: theme.colorScheme.primary),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
@@ -162,11 +165,10 @@ class _ContactRow extends StatelessWidget {
   }
 }
 
-/// Rating, trips and earnings.
-///
-/// These numbers come from finished trips, ratings and payments, which
-/// Members 4 and 5 build. Until that data is passed in, each tile shows "—".
+/// Three tiles showing the driver's rating, completed trips and earnings.
+/// A value that is not passed in is shown as "—".
 class PerformanceSnapshot extends StatelessWidget {
+  /// Creates the snapshot. Every value is optional.
   const PerformanceSnapshot({
     super.key,
     this.rating,
@@ -178,6 +180,7 @@ class PerformanceSnapshot extends StatelessWidget {
   final int? completedTrips;
   final int? earningsRwf;
 
+  /// Draws the heading and the three tiles in one row.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -221,7 +224,9 @@ class PerformanceSnapshot extends StatelessWidget {
   }
 }
 
+/// One tile of the performance snapshot.
 class _StatTile extends StatelessWidget {
+  /// Creates the tile with its icon, label, big value and small caption.
   const _StatTile({
     required this.icon,
     required this.label,
@@ -234,6 +239,7 @@ class _StatTile extends StatelessWidget {
   final String value;
   final String caption;
 
+  /// Draws the label row, the value and the caption inside a card.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -247,7 +253,7 @@ class _StatTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: AppSpacing.md, color: colors.primary),
+                Icon(icon, size: AppSpacing.iconSm, color: colors.primary),
                 const SizedBox(width: AppSpacing.xs),
                 Flexible(
                   child: Text(
@@ -280,8 +286,10 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-/// The "Registered Vehicle" card with its plate badge and edit buttons.
+/// The "Registered Vehicle" card: the vehicle's photo with its plate on
+/// top, its capacity and rate, and the buttons that change it.
 class RegisteredVehicleCard extends StatelessWidget {
+  /// Creates the card. Each callback runs when its button is tapped.
   const RegisteredVehicleCard({
     super.key,
     required this.vehicle,
@@ -295,21 +303,24 @@ class RegisteredVehicleCard extends StatelessWidget {
   final VoidCallback onEditPlatePressed;
   final VoidCallback onRemovePressed;
 
+  /// Draws the title, the photo with the plate badge, the details box
+  /// and the three action buttons.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final vehicleClass = VehicleClasses.of(vehicle.vehicleType);
 
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: AppSpacing.cardInsets,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                VehicleTypeIcon(vehicleType: vehicle.vehicleType),
+                VehicleTypeIcon(vehicleClass: vehicleClass),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -320,7 +331,7 @@ class RegisteredVehicleCard extends StatelessWidget {
                         style: theme.textTheme.titleMedium,
                       ),
                       Text(
-                        '${vehicle.vehicleType.shortLabel} Class',
+                        '${vehicleClass.shortLabel} Class',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -331,15 +342,14 @@ class RegisteredVehicleCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            // The vehicle photo with the plate on top, like the Figma.
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    VehicleTypePhoto(vehicleType: vehicle.vehicleType),
+                    VehicleTypePhoto(vehicleClass: vehicleClass),
                     Positioned(
                       right: AppSpacing.sm,
                       bottom: AppSpacing.sm,
@@ -351,44 +361,39 @@ class RegisteredVehicleCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              width: double.infinity,
+              padding: AppSpacing.cardInsets,
               decoration: BoxDecoration(
                 color: colors.primaryContainer,
-                borderRadius: BorderRadius.circular(AppSpacing.md),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          vehicle.vehicleType.label,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: colors.onPrimaryContainer,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          'Capacity: ${vehicle.capacityKg} kg',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onPrimaryContainer,
-                          ),
-                        ),
-                        Text(
-                          'Rate: ${vehicle.vehicleType.rateLabel}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onPrimaryContainer,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    vehicleClass.label,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colors.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Capacity: ${vehicle.capacityKg.round()} kg',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onPrimaryContainer,
+                    ),
+                  ),
+                  Text(
+                    'Rate: ${vehicleClass.rateLabel}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onPrimaryContainer,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            // Wrap moves buttons to a new line if the phone is too narrow.
+            // Wrap moves a button to the next line on a narrow phone.
             Wrap(
               spacing: AppSpacing.xs,
               children: [
@@ -417,12 +422,14 @@ class RegisteredVehicleCard extends StatelessWidget {
   }
 }
 
-/// The dark licence plate badge, e.g. "RAD 428 E".
+/// The dark badge that shows a licence plate, for example "RAD 428 E".
 class PlateBadge extends StatelessWidget {
+  /// Creates the badge for one plate number.
   const PlateBadge({super.key, required this.plate});
 
   final String plate;
 
+  /// Draws the plate in bold, light text on a dark rounded background.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -448,8 +455,11 @@ class PlateBadge extends StatelessWidget {
   }
 }
 
-/// Shown instead of the vehicle card when the driver has no vehicle.
+/// The card shown in place of the vehicle card when the driver has no
+/// vehicle.
 class NoVehicleCard extends StatelessWidget {
+  /// Creates the card. While [isSaving] is true the button shows a
+  /// spinner and cannot be tapped.
   const NoVehicleCard({
     super.key,
     required this.isSaving,
@@ -459,6 +469,7 @@ class NoVehicleCard extends StatelessWidget {
   final bool isSaving;
   final VoidCallback onAddPressed;
 
+  /// Draws an icon, a short explanation and the "Add vehicle" button.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -471,7 +482,7 @@ class NoVehicleCard extends StatelessWidget {
           children: [
             Icon(
               Icons.local_shipping_outlined,
-              size: AppSpacing.xl,
+              size: AppSpacing.iconLg,
               color: colors.primary,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -489,9 +500,9 @@ class NoVehicleCard extends StatelessWidget {
               onPressed: isSaving ? null : onAddPressed,
               icon: isSaving
                   ? const SizedBox.square(
-                dimension: AppSpacing.md,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+                      dimension: AppSpacing.iconSm,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Icon(Icons.add),
               label: const Text('Add vehicle'),
             ),
@@ -502,73 +513,37 @@ class NoVehicleCard extends StatelessWidget {
   }
 }
 
-/// "Operational Zones": every hub as a chip; the picked ones are filled in.
-class OperatingZonesCard extends StatelessWidget {
-  const OperatingZonesCard({
-    super.key,
-    required this.selectedHubs,
-    required this.district,
-    required this.onHubToggled,
-  });
+/// The "Operational Zone" card: the district the driver works from.
+class OperatingZoneCard extends StatelessWidget {
+  /// Creates the card for one district name.
+  const OperatingZoneCard({super.key, required this.district});
 
-  final List<String> selectedHubs;
+  final String district;
 
-  /// e.g. "Gasabo". Null when no hubs are picked yet.
-  final String? district;
-
-  final ValueChanged<String> onHubToggled;
-
+  /// Draws the title and the district as a chip. An empty district is
+  /// shown as "Not set".
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final districtName = district;
 
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: AppSpacing.cardInsets,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(Icons.explore_outlined, color: colors.primary),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    'Operational Zones',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                if (districtName != null)
-                  Text(
-                    '$districtName District',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Tap a hub to add or remove it. Keep at least 2.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
+            Icon(Icons.explore_outlined, color: colors.primary),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                'Operational Zone',
+                style: theme.textTheme.titleMedium,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final hub in kigaliHubDistricts.keys)
-                  FilterChip(
-                    label: Text(hub),
-                    selected: selectedHubs.contains(hub),
-                    onSelected: (_) => onHubToggled(hub),
-                  ),
-              ],
+            Chip(
+              label: Text(district.isEmpty ? 'Not set' : '$district District'),
+              visualDensity: VisualDensity.compact,
             ),
           ],
         ),
@@ -577,12 +552,16 @@ class OperatingZonesCard extends StatelessWidget {
   }
 }
 
-/// "ACCOUNT & COMPLIANCE": the link to Settings and the support hotline.
+/// The "ACCOUNT & COMPLIANCE" list: the link to Settings and the driver
+/// support hotline.
 class AccountSection extends StatelessWidget {
+  /// Creates the section. [onSettingsPressed] runs when "App Settings"
+  /// is tapped.
   const AccountSection({super.key, required this.onSettingsPressed});
 
   final VoidCallback onSettingsPressed;
 
+  /// Draws the heading and the two list rows inside a card.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -623,12 +602,14 @@ class AccountSection extends StatelessWidget {
   }
 }
 
-/// The soft red "Log Out Partner Account" button at the bottom.
+/// The "Log Out Partner Account" button at the bottom of the profile.
 class LogoutButton extends StatelessWidget {
+  /// Creates the button. [onPressed] runs when it is tapped.
   const LogoutButton({super.key, required this.onPressed});
 
   final VoidCallback onPressed;
 
+  /// Draws a full-width button in the theme's soft error colours.
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -636,7 +617,7 @@ class LogoutButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: colors.errorContainer,
         foregroundColor: colors.onErrorContainer,
-        minimumSize: const Size.fromHeight(kMinInteractiveDimension),
+        minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
       ),
       onPressed: onPressed,
       icon: const Icon(Icons.logout),

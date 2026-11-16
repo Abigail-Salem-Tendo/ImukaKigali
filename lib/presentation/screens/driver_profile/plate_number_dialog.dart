@@ -1,52 +1,56 @@
-// Owner: Member 2
-// A dialog for typing a Rwanda licence plate number.
-
 import 'package:flutter/material.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 
-import '../../../domain/entities/vehicle.dart';
-
-/// Opens the dialog. Returns the plate written the standard way
-/// ("RAD 428 E"), or null if the driver tapped Cancel.
+/// Opens a dialog where the driver types a licence plate number.
+/// Returns the plate written the standard way ("RAD 428 E"), or null if
+/// the driver tapped Cancel. [initialPlate] fills the field at the start.
 Future<String?> showPlateNumberDialog(
-    BuildContext context, {
-      String initialPlate = '',
-    }) {
+  BuildContext context, {
+  String initialPlate = '',
+}) {
   return showDialog<String>(
     context: context,
     builder: (_) => _PlateNumberDialog(initialPlate: initialPlate),
   );
 }
 
-// A StatefulWidget is allowed here ONLY because it must hold a
-// TextEditingController and a form key (team rule 2). It keeps no other state.
+/// The dialog itself. It is a StatefulWidget only because it has to keep
+/// a text controller and a form key alive.
 class _PlateNumberDialog extends StatefulWidget {
+  /// Creates the dialog with the text that fills the field at the start.
   const _PlateNumberDialog({required this.initialPlate});
 
   final String initialPlate;
 
+  /// Creates the object that holds the controller and the form key.
   @override
   State<_PlateNumberDialog> createState() => _PlateNumberDialogState();
 }
 
+/// Holds the text controller and the form key of the plate dialog.
 class _PlateNumberDialogState extends State<_PlateNumberDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _controller =
-  TextEditingController(text: widget.initialPlate);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialPlate,
+  );
 
+  /// Frees the text controller when the dialog closes.
   @override
   void dispose() {
-    // Controllers must be disposed, or they keep using memory.
     _controller.dispose();
     super.dispose();
   }
 
+  /// Checks the typed plate. If it is valid, it closes the dialog and
+  /// returns the formatted plate. If not, the field shows its error.
   void _save() {
-    // validate() runs the validator below and shows its message if wrong.
     if (_formKey.currentState?.validate() ?? false) {
       Navigator.pop(context, formatRwandaPlate(_controller.text));
     }
   }
 
+  /// Draws the dialog: a title, the plate field, and the Cancel and Save
+  /// buttons.
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
