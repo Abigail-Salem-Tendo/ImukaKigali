@@ -1,72 +1,78 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:imuka_kigali/core/constants/app_routes.dart';
+import 'package:imuka_kigali/core/theme/app_spacing.dart';
+import 'package:imuka_kigali/core/widgets/app_snack_bar.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/driver_registration_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/registration_widget.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step2/vehicle_type_card.dart';
+import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
-import '../../../core/constants/app_routes.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/app_snack_bar.dart';
-import '../../../domain/entities/vehicle.dart';
-import '../driver_registration_step1/driver_registration_bloc.dart';
-import '../driver_registration_step1/registration_widgets.dart';
-import '../login/auth_bloc.dart';
-import 'vehicle_type_card.dart';
-
+/// Driver registration, step 2: the vehicle type and the plate number.
 class DriverRegistrationStep2Screen extends StatelessWidget {
+  /// Creates the screen with the bloc that step 1 created.
   const DriverRegistrationStep2Screen({super.key, required this.bloc});
 
-  /// The bloc that step 1 created, passed in by app_router.dart.
   final DriverRegistrationBloc bloc;
 
+  /// Shares the existing bloc with the step 2 view. BlocProvider.value
+  /// does not close the bloc, because step 1 owns it.
   @override
   Widget build(BuildContext context) {
-    // BlocProvider.value shares a bloc that ALREADY exists and does not close
-    // it. Step 1 owns it and closes it when the registration flow ends.
     return BlocProvider.value(value: bloc, child: const _Step2View());
   }
 }
 
+/// The visible part of step 2.
 class _Step2View extends StatelessWidget {
+  /// Creates the view. It reads everything from the bloc.
   const _Step2View();
 
+  /// Reacts when the registration status changes. A failure shows the
+  /// error in a snackbar. A success reloads the signed-in user and opens
+  /// the driver home, removing the registration screens from the back
+  /// stack.
+  void _onStatusChanged(BuildContext context, DriverRegistrationState state) {
+    if (state.status == DriverRegistrationStatus.failure) {
+      showAppSnackBar(
+        context,
+        state.error ?? 'Registration failed. Please try again.',
+      );
+    }
+    if (state.status == DriverRegistrationStatus.success) {
+      context.read<AuthBloc>().add(const AuthCheckRequested());
+      showAppSnackBar(context, 'Registration complete. Welcome aboard!');
+      context.go(AppRoutes.driverHome);
+    }
+  }
+
+  /// Draws the vehicle cards, the plate field and the finish button in a
+  /// scrolling list. It redraws whenever the bloc's state changes.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    // BlocListener REACTS to changes (snackbars, moving to another screen).
     return BlocListener<DriverRegistrationBloc, DriverRegistrationState>(
       listenWhen: (previous, current) => previous.status != current.status,
-      listener: (context, state) {
-        if (state.status == DriverRegistrationStatus.failure) {
-          showAppSnackBar(
-            context,
-            state.error ?? 'Registration failed. Please try again.',
-          );
-        }
-        if (state.status == DriverRegistrationStatus.success) {
-          // Ask the global AuthBloc (Member 1) to load the new account...
-          context.read<AuthBloc>().add(const AuthCheckRequested());
-          showAppSnackBar(context, 'Registration complete. Welcome aboard!');
-          // ...then open the driver home. go() also removes both
-          // registration screens, so "back" will not return to them.
-          context.go(AppRoutes.driverHome);
-        }
-      },
+      listener: _onStatusChanged,
       child: Scaffold(
         appBar: AppBar(title: const RegistrationAppBarTitle()),
         body: SafeArea(
           child: BlocBuilder<DriverRegistrationBloc, DriverRegistrationState>(
             builder: (context, state) {
               final bloc = context.read<DriverRegistrationBloc>();
-              final vehicleTypeError =
-              state.showStep2Errors ? state.vehicleTypeError : null;
-              final plateError =
-              state.showStep2Errors ? state.plateNumberError : null;
+              final vehicleTypeError = state.showStep2Errors
+                  ? state.vehicleTypeError
+                  : null;
+              final plateError = state.showStep2Errors
+                  ? state.plateNumberError
+                  : null;
 
               return ListView(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: AppSpacing.screenPadding,
                 children: [
                   const RegistrationStepCard(
                     step: 2,
@@ -81,7 +87,8 @@ class _Step2View extends StatelessWidget {
                       ),
                       children: [
                         const TextSpan(
-                          text: 'Select your vehicle class. Kigali vehicle '
+                          text:
+                              'Select your vehicle class. Kigali vehicle '
                               'regulations strictly differentiate ',
                         ),
                         TextSpan(
@@ -89,7 +96,8 @@ class _Step2View extends StatelessWidget {
                           style: TextStyle(color: colors.primary),
                         ),
                         const TextSpan(
-                          text: ' from standard Car & Truck automotive '
+                          text:
+                              ' from standard Car & Truck automotive '
                               'plates.',
                         ),
                       ],
@@ -113,22 +121,20 @@ class _Step2View extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
-
-                  // One card per vehicle class.
-                  for (final type in VehicleType.values)
+                  for (final vehicleClass in VehicleClasses.all)
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: VehicleTypeCard(
-                        vehicleType: type,
-                        selected: state.vehicleType == type,
-                        onTap: () =>
-                            bloc.add(RegistrationVehicleTypeSelected(type)),
+                        vehicleClass: vehicleClass,
+                        selected: state.vehicleType == vehicleClass.type,
+                        onTap: () => bloc.add(
+                          RegistrationVehicleTypeSelected(vehicleClass.type),
+                        ),
                       ),
                     ),
                   if (vehicleTypeError != null)
                     GroupErrorText(vehicleTypeError),
                   const SizedBox(height: AppSpacing.md),
-
                   FormSection(
                     title: 'Rwanda License Plate Number',
                     children: [
@@ -157,7 +163,7 @@ class _Step2View extends StatelessWidget {
                   ArrowButton(
                     text: 'Complete Registration',
                     isLoading:
-                    state.status == DriverRegistrationStatus.submitting,
+                        state.status == DriverRegistrationStatus.submitting,
                     onPressed: () => bloc.add(const RegistrationSubmitted()),
                   ),
                 ],

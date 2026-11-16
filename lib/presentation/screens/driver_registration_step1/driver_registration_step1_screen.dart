@@ -1,25 +1,24 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:imuka_kigali/core/constants/app_routes.dart';
+import 'package:imuka_kigali/core/theme/app_spacing.dart';
+import 'package:imuka_kigali/core/widgets/app_snack_bar.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
+import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/driver_registration_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/registration_widget.dart';
 
-import '../../../core/constants/app_routes.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/app_snack_bar.dart';
-import '../../../domain/entities/vehicle.dart';
-import '../../../domain/repositories/auth_repository.dart';
-import '../../../domain/repositories/vehicle_repository.dart';
-import 'driver_registration_bloc.dart';
-import 'registration_widgets.dart';
-
+/// Driver registration, step 1: personal details, contact and base location.
 class DriverRegistrationStep1Screen extends StatelessWidget {
+  /// Creates the screen. It needs no data.
   const DriverRegistrationStep1Screen({super.key});
 
+  /// Creates the DriverRegistrationBloc and puts the step 1 view under it.
+  /// Step 2 later receives this same bloc, so the answers are kept.
   @override
   Widget build(BuildContext context) {
-    // This screen CREATES the registration bloc. Step 2 receives the same
-    // bloc, so everything typed here is still there on step 2.
     return BlocProvider(
       create: (ctx) => DriverRegistrationBloc(
         authRepository: ctx.read<AuthRepository>(),
@@ -30,23 +29,27 @@ class DriverRegistrationStep1Screen extends StatelessWidget {
   }
 }
 
+/// The visible part of step 1.
 class _Step1View extends StatelessWidget {
+  /// Creates the view. It reads everything from the bloc.
   const _Step1View();
 
+  /// Runs when "Continue" is tapped. It turns on the error messages, then
+  /// opens step 2 if every answer is valid, or shows a snackbar if not.
   void _onContinuePressed(BuildContext context) {
     final bloc = context.read<DriverRegistrationBloc>();
-    // From now on, show the red error messages under wrong fields.
     bloc.add(const RegistrationStep1Continued());
 
-    // The bloc has been checking every answer while the driver typed.
     if (bloc.state.isStep1Valid) {
-      // Hand the SAME bloc to step 2 (app_router.dart reads it from "extra").
+      // The bloc travels to step 2 through the route's "extra" value.
       context.push(AppRoutes.driverRegister2, extra: bloc);
     } else {
       showAppSnackBar(context, 'Please fix the highlighted fields.');
     }
   }
 
+  /// Draws the whole form in a scrolling list, so it fits small phones
+  /// and landscape. It redraws whenever the bloc's state changes.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -55,20 +58,17 @@ class _Step1View extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const RegistrationAppBarTitle()),
       body: SafeArea(
-        // BlocBuilder DRAWS the screen again whenever the state changes.
         child: BlocBuilder<DriverRegistrationBloc, DriverRegistrationState>(
           builder: (context, state) {
             final bloc = context.read<DriverRegistrationBloc>();
 
-            // Errors only appear after the driver taps Continue once.
+            // Returns the error only after "Continue" was tapped once.
             String? errorIf(String? error) =>
                 state.showStep1Errors ? error : null;
             final hubsError = errorIf(state.hubsError);
 
-            // ListView scrolls, so nothing overflows in landscape
-            // or on small phones.
             return ListView(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: AppSpacing.screenPadding,
               children: [
                 const RegistrationStepCard(
                   step: 1,
@@ -80,15 +80,13 @@ class _Step1View extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'Enter your personal contact info and primary operating '
-                      'sectors across Kigali to get matched with nearby '
-                      'relocations.',
+                  'sectors across Kigali to get matched with nearby '
+                  'relocations.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-
-                // ---------------- Personal information ----------------
                 FormSection(
                   icon: Icons.badge_outlined,
                   title: 'Personal information',
@@ -113,8 +111,6 @@ class _Step1View extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
-
-                // ---------------- Contact & MoMo Payout ----------------
                 FormSection(
                   icon: Icons.account_balance_wallet_outlined,
                   title: 'Contact & MoMo Payout',
@@ -133,7 +129,10 @@ class _Step1View extends StatelessWidget {
                         errorText: errorIf(state.phoneError),
                       ),
                       onChanged: (value) => bloc.add(
-                        RegistrationFieldChanged(RegistrationField.phone, value),
+                        RegistrationFieldChanged(
+                          RegistrationField.phone,
+                          value,
+                        ),
                       ),
                     ),
                     const FieldLabel('Email Address', isRequired: true),
@@ -148,7 +147,10 @@ class _Step1View extends StatelessWidget {
                         errorText: errorIf(state.emailError),
                       ),
                       onChanged: (value) => bloc.add(
-                        RegistrationFieldChanged(RegistrationField.email, value),
+                        RegistrationFieldChanged(
+                          RegistrationField.email,
+                          value,
+                        ),
                       ),
                     ),
                     const FieldLabel('Secure Password', isRequired: true),
@@ -200,15 +202,13 @@ class _Step1View extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
-
-                // ---------------- Base Location in Kigali ----------------
                 FormSection(
                   icon: Icons.explore_outlined,
                   title: 'Base Location in Kigali',
                   children: [
                     Text(
                       'Select where you usually park or start your shifts to '
-                          'receive priority nearby move dispatches.',
+                      'receive priority nearby move dispatches.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
@@ -261,11 +261,12 @@ class _Step1View extends StatelessWidget {
   }
 }
 
-/// The "+250" at the start of the phone field. Using prefixIcon (not
-/// prefixText) keeps it visible even before the driver starts typing.
+/// The "+250" shown at the start of the phone field.
 class _CountryCodePrefix extends StatelessWidget {
+  /// Creates the prefix. It needs no data.
   const _CountryCodePrefix();
 
+  /// Draws "+250" with space on both sides.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -276,13 +277,15 @@ class _CountryCodePrefix extends StatelessWidget {
   }
 }
 
-/// The eye icon that shows or hides the password.
+/// The eye icon that shows or hides a password.
 class _PasswordEyeButton extends StatelessWidget {
+  /// Creates the button. [visible] says whether the password shows now.
   const _PasswordEyeButton({required this.visible, required this.onPressed});
 
   final bool visible;
   final VoidCallback onPressed;
 
+  /// Draws an open eye when the password shows, or a crossed eye when hidden.
   @override
   Widget build(BuildContext context) {
     return IconButton(
