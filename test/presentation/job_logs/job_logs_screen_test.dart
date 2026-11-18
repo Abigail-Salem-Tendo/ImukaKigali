@@ -6,6 +6,7 @@ import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
+import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_summary_card.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
 import 'job_logs_fakes.dart';
@@ -61,5 +62,77 @@ void main() {
     expect(find.text('Jobs you accept will show up here.'), findsOneWidget);
     expect(find.text('Find jobs'), findsOneWidget);
     expect(find.text('Recent dispatch jobs'), findsNothing);
+  });
+
+  testWidgets('shows my jobs, and This Week changes the list and summary', (
+    tester,
+  ) async {
+    // Tall enough that every card is built, since ListView only builds
+    // the cards that are on screen.
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    authRepo
+      ..users['client1'] = testUser('client1', 'Diane Uwase')
+      ..users['client2'] = testUser('client2', 'Eric Mugisha');
+    final now = DateTime.now();
+    final jobs = [
+      testJob(
+        id: 'acc1',
+        clientId: 'client1',
+        status: RequestStatus.accepted,
+        amount: 24000,
+        createdAt: now,
+      ),
+      testJob(id: 'done', clientId: 'client2', amount: 15000, createdAt: now),
+      testJob(
+        id: 'week',
+        clientId: 'client2',
+        amount: 32000,
+        createdAt: now.subtract(const Duration(days: 8)),
+      ),
+      testJob(
+        id: 'old4',
+        clientId: 'no-profile',
+        amount: 21000,
+        createdAt: now.subtract(const Duration(days: 40)),
+      ),
+    ];
+
+    await openScreen(tester);
+    jobRepo.myJobs.add(jobs);
+    await tester.pumpAndSettle();
+
+    Finder inSummary(String text) => find.descendant(
+      of: find.byType(JobLogsSummaryCard),
+      matching: find.text(text),
+    );
+
+    expect(find.text('#IMK-ACC1'), findsOneWidget);
+    expect(find.text('#IMK-DONE'), findsOneWidget);
+    expect(find.text('#IMK-WEEK'), findsOneWidget);
+    expect(find.text('#IMK-OLD4'), findsOneWidget);
+    expect(find.text('Diane Uwase'), findsOneWidget);
+    expect(find.text('Eric Mugisha'), findsNWidgets(2));
+    expect(find.text('Client'), findsOneWidget);
+    expect(find.text('Continue delivery'), findsOneWidget);
+    expect(inSummary('TOTAL LIFETIME GROSS'), findsOneWidget);
+    expect(inSummary('68,000 RWF'), findsOneWidget);
+    expect(inSummary('3 Moves'), findsOneWidget);
+    expect(inSummary('1 Move'), findsOneWidget);
+
+    await tester.tap(find.text('This Week'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('#IMK-ACC1'), findsOneWidget);
+    expect(find.text('#IMK-DONE'), findsOneWidget);
+    expect(find.text('#IMK-WEEK'), findsNothing);
+    expect(find.text('#IMK-OLD4'), findsNothing);
+    expect(find.text('Client'), findsNothing);
+    expect(find.text('Continue delivery'), findsOneWidget);
+    expect(inSummary('GROSS THIS WEEK'), findsOneWidget);
+    expect(inSummary('15,000 RWF'), findsOneWidget);
+    expect(inSummary('1 Move'), findsNWidgets(2));
   });
 }
