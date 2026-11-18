@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
+import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
 /// the real screen (change only your own lines to avoid merge conflicts).
@@ -20,7 +21,7 @@ final GoRouter appRouter = GoRouter(
     _placeholder(AppRoutes.findingDriver, 'Finding your driver'),
     _placeholder(AppRoutes.driverHome, 'Driver home'),
     _placeholder(AppRoutes.driverJobs, 'Driver jobs'),
-    _placeholder(AppRoutes.jobLogs, 'Job logs'),
+    GoRoute(path: AppRoutes.jobLogs, builder: (_, _) => const JobLogsScreen()),
     _placeholder(AppRoutes.driverContact, 'Driver contact'),
     _placeholder(AppRoutes.delivery, 'Delivery and payment'),
     _placeholder(AppRoutes.rate, 'Rate driver'),
