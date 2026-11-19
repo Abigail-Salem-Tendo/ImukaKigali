@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
+import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step1/driver_registration_bloc.dart';
@@ -30,7 +31,10 @@ final GoRouter appRouter = GoRouter(
     _placeholder(AppRoutes.whereFromTo, 'Where from, where to'),
     _placeholder(AppRoutes.itemDetails, 'Item details'),
     _placeholder(AppRoutes.findingDriver, 'Finding your driver'),
-    _placeholder(AppRoutes.driverHome, 'Driver home'),
+    GoRoute(
+      path: AppRoutes.driverHome,
+      builder: (_, _) => const DriverHomeScreen(),
+    ),
     GoRoute(
       path: AppRoutes.driverJobs,
       builder: (_, _) => const DriverJobsScreen(),
