@@ -21,7 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AppUser?> getCurrentUser() async {
-    // The first event is the restored session (or null), so a returning user
+    // The first event is the restored session (orr null), so a returning user
     // is found even if Firebase has not finished loading it yet.
     final firebaseUser = await _auth.authStateChanges().first;
     if (firebaseUser == null) return null;
@@ -91,7 +91,42 @@ class AuthRepositoryImpl implements AuthRepository {
       await cred.user?.delete();
       throw Exception(e.message ?? 'Could not save your profile. Try again.');
     }
+
+    // The account is ready even if this email fails to send, so a failure
+    // here is ignored: the "Check your inbox" screen has a Resend button.
+    try {
+      await cred.user!.sendEmailVerification();
+    } on FirebaseAuthException {
+      // Ignored on purpose (see above).
+    }
     return user;
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    try {
+      await _auth.currentUser?.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_readable(e));
+    }
+  }
+
+  @override
+  Future<bool> isEmailVerified() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return false;
+    }
+    try {
+      // Firebase remembers the user as they were at login. reload() fetches
+      // them again, so a link clicked a moment ago is seen.
+      await user.reload();
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_readable(e));
+    }
+    // Read currentUser again: reload() refreshes Firebase's copy, not the
+    // old `user` object we are holding.
+    return _auth.currentUser?.emailVerified ?? false;
   }
 
   @override

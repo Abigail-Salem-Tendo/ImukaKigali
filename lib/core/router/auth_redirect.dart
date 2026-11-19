@@ -41,7 +41,19 @@ String? authRedirect(AuthState auth, String location) {
   }
 
   // From here on the user is signed in.
-  if (_signedOutOnlyPages.contains(location)) {
+
+  // Blocked until they click the link in the verification email.
+  if (!auth.emailVerified) {
+    if (location == AppRoutes.verifyEmail) {
+      return null;
+    }
+    return AppRoutes.verifyEmail;
+  }
+
+  // Verified. The inbox page has done its job, so it counts as a page
+  // they no longer need, like login.
+  if (_signedOutOnlyPages.contains(location) ||
+      location == AppRoutes.verifyEmail) {
     return homeFor(auth);
   }
   return null;

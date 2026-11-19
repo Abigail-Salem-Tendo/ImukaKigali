@@ -5,8 +5,9 @@ import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
-AuthState _signedInAs(String role) => AuthState(
+AuthState _signedInAs(String role, {bool emailVerified = true}) => AuthState(
   status: AuthStatus.authenticated,
+  emailVerified: emailVerified,
   user: AppUser(
     uid: 'u1',
     role: role,
@@ -59,5 +60,32 @@ void main() {
       expect(authRedirect(driver, AppRoutes.jobLogs), isNull);
       expect(authRedirect(driver, AppRoutes.driverRegister2), isNull);
     });
+
+    test('leaves the inbox page once the email is verified', () {
+      expect(
+        authRedirect(_signedInAs(UserRoles.client), AppRoutes.verifyEmail),
+        AppRoutes.whereFromTo,
+      );
+    });
+  });
+
+  group('signed in but email not verified', () {
+    final unverified = _signedInAs(UserRoles.client, emailVerified: false);
+
+    test('is sent to the inbox page from anywhere', () {
+      expect(authRedirect(unverified, AppRoutes.login), AppRoutes.verifyEmail);
+      expect(
+        authRedirect(unverified, AppRoutes.whereFromTo),
+        AppRoutes.verifyEmail,
+      );
+    });
+
+    test('can stay on the inbox page', () {
+      expect(authRedirect(unverified, AppRoutes.verifyEmail), isNull);
+    });
+  });
+
+  test('a signed-out user on the inbox page is sent to login', () {
+    expect(authRedirect(_signedOut, AppRoutes.verifyEmail), AppRoutes.login);
   });
 }

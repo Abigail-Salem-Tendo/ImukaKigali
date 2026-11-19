@@ -12,6 +12,7 @@ class AuthState extends Equatable {
   const AuthState({
     this.status = AuthStatus.unknown,
     this.user,
+    this.emailVerified = false,
     this.isLoading = false,
     this.error,
     this.message,
@@ -22,6 +23,11 @@ class AuthState extends Equatable {
   /// The signed-in user's profile. null when signed out.
   final AppUser? user;
 
+  /// Whether the signed-in user has clicked the link in the verification
+  /// email. It lives here, not in AppUser, because Firebase Auth keeps it,
+  /// not the 'users' document.
+  final bool emailVerified;
+
   /// true while a login, register or reset request is running
   /// (use it for AppButton.isLoading).
   final bool isLoading;
@@ -29,7 +35,7 @@ class AuthState extends Equatable {
   /// A readable error to show in a snackbar. Cleared on the next state.
   final String? error;
 
-  /// A readable success message (e.g. "reset link sent"). Cleared on the next state.
+  /// A readable success message . Cleared on the next state.
   final String? message;
 
   bool get isClient => user?.role == UserRoles.client;
@@ -39,17 +45,26 @@ class AuthState extends Equatable {
   AuthState copyWith({
     AuthStatus? status,
     AppUser? user,
+    bool? emailVerified,
     bool? isLoading,
     String? error,
     String? message,
   }) => AuthState(
     status: status ?? this.status,
     user: user ?? this.user,
+    emailVerified: emailVerified ?? this.emailVerified,
     isLoading: isLoading ?? this.isLoading,
     error: error,
     message: message,
   );
 
   @override
-  List<Object?> get props => [status, user, isLoading, error, message];
+  List<Object?> get props => [
+    status,
+    user,
+    emailVerified,
+    isLoading,
+    error,
+    message,
+  ];
 }
