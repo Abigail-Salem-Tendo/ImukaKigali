@@ -1,67 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
-import 'package:imuka_kigali/domain/entities/app_user.dart';
-import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
 
-/// Records what the login screen asked for, instead of calling Firebase.
-class _RecordingAuthRepository implements AuthRepository {
-  final List<String> signInEmails = [];
-  final List<String> resetEmails = [];
-  String? failWith;
-
-  @override
-  Future<AppUser> signIn({
-    required String email,
-    required String password,
-  }) async {
-    signInEmails.add(email);
-    if (failWith != null) throw Exception(failWith);
-    return AppUser(
-      uid: 'u1',
-      role: UserRoles.client,
-      fullName: 'Diane Uwase',
-      phone: '0781234567',
-      email: email,
-      district: 'Kicukiro',
-      createdAt: DateTime(2026),
-    );
-  }
-
-  @override
-  Future<void> sendPasswordReset(String email) async => resetEmails.add(email);
-
-  @override
-  Future<AppUser?> getCurrentUser() async => null;
-
-  @override
-  Future<AppUser> register({
-    required String fullName,
-    required String email,
-    required String phone,
-    required String password,
-    required String role,
-    required String district,
-  }) => throw UnimplementedError();
-
-  @override
-  Future<void> signOut() async {}
-
-  @override
-  Future<AppUser?> getUser(String uid) async => null;
-
-  @override
-  Future<void> updateUser(AppUser user) async {}
-}
+import '../helpers/recording_auth_repository.dart';
 
 void main() {
-  late _RecordingAuthRepository repo;
+  late RecordingAuthRepository repo;
 
-  setUp(() => repo = _RecordingAuthRepository());
+  setUp(() => repo = RecordingAuthRepository());
 
   Future<void> showLoginScreen(WidgetTester tester) async {
     await tester.pumpWidget(

@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
+import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
@@ -19,8 +21,14 @@ final GoRouter appRouter = GoRouter(
       authRedirect(context.read<AuthBloc>().state, state.matchedLocation),
   routes: [
     GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
-    _placeholder(AppRoutes.createAccount, 'Create account'),
-    _placeholder(AppRoutes.driverPartner, 'Driver partner registration'),
+    GoRoute(
+      path: AppRoutes.createAccount,
+      builder: (_, _) => const CreateAccountScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.driverPartner,
+      builder: (_, _) => const DriverPartnerRegistrationScreen(),
+    ),
     _placeholder(AppRoutes.driverRegister1, 'Driver registration: step 1'),
     _placeholder(AppRoutes.driverRegister2, 'Driver registration: step 2'),
     _placeholder(AppRoutes.driverProfile, 'Driver profile'),

@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const _BrandHeader(),
+                  const BrandHeader(),
                   const SizedBox(height: AppSpacing.xl),
                   Text('Welcome Back', style: textTheme.headlineMedium),
                   const SizedBox(height: AppSpacing.sm),
@@ -173,38 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// The app icon and name at the top of the screen, as in the Figma design.
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Row(
-      children: [
-        // There is no logo image in the project yet, so a truck icon on a
-        // dark rounded square stands in for it.
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: scheme.inverseSurface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Icon(
-              Icons.local_shipping_outlined,
-              color: scheme.onInverseSurface,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Text('Imuka Kigali', style: Theme.of(context).textTheme.titleLarge),
-      ],
     );
   }
 }
