@@ -1,22 +1,18 @@
 // Owner: Member 4
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
 import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
+import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
+import 'package:imuka_kigali/presentation/screens/driver_home/no_vehicle_view.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/accept_job_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/accepted_job_view.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_header.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/open_job_card.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/open_jobs_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
-
-// VEHICLE TYPE PLACEHOLDER: replace with the signed-in driver's
-// VehicleRepository.getVehicle(driverId).vehicleType once Member 2's PR is
-// merged. Until then every driver sees pickup jobs.
-const _vehicleTypeUntilVehicleRepositoryIsMerged = VehicleTypes.pickup;
 
 class DriverJobsScreen extends StatelessWidget {
   const DriverJobsScreen({super.key});
@@ -26,10 +22,10 @@ class DriverJobsScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (ctx) => OpenJobsBloc(ctx.read<DriverJobRepository>())
-            ..add(
-              const OpenJobsStarted(_vehicleTypeUntilVehicleRepositoryIsMerged),
-            ),
+          create: (ctx) => OpenJobsBloc(
+            ctx.read<DriverJobRepository>(),
+            ctx.read<VehicleRepository>(),
+          )..add(OpenJobsStarted(_signedInDriverId(ctx))),
         ),
         BlocProvider(
           create: (ctx) => AcceptJobBloc(
@@ -96,6 +92,9 @@ class DriverJobsScreen extends StatelessWidget {
   }
 }
 
+String _signedInDriverId(BuildContext context) =>
+    context.read<AuthBloc>().state.user?.uid ?? '';
+
 class _JobsTitle extends StatelessWidget {
   const _JobsTitle();
 
@@ -137,9 +136,10 @@ class _OpenJobsBody extends StatelessWidget {
         OpenJobsStatus.failure => EmptyState.error(
           message: state.error,
           onRetry: () => context.read<OpenJobsBloc>().add(
-            const OpenJobsStarted(_vehicleTypeUntilVehicleRepositoryIsMerged),
+            OpenJobsStarted(_signedInDriverId(context)),
           ),
         ),
+        OpenJobsStatus.noVehicle => const NoVehicleView(),
         OpenJobsStatus.success => _OpenJobsList(
           state: state,
           acceptState: acceptState,
@@ -164,10 +164,7 @@ class _OpenJobsList extends StatelessWidget {
     return ListView(
       padding: AppSpacing.screenPadding,
       children: [
-        DriverJobsHeader(
-          district: district,
-          vehicleType: _vehicleTypeUntilVehicleRepositoryIsMerged,
-        ),
+        DriverJobsHeader(district: district, vehicle: state.vehicle!),
         const SizedBox(height: AppSpacing.lg),
         _ListTitle(jobCount: state.jobs.length),
         const SizedBox(height: AppSpacing.md),

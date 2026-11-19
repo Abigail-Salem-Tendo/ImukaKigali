@@ -2,21 +2,25 @@
 import 'package:flutter/material.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
 import 'package:imuka_kigali/core/widgets/widgets.dart';
-import 'package:imuka_kigali/presentation/screens/driver_jobs/open_job_format.dart';
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
+// Member 2's formatRwf(int) clashes with mine in job_log_format.dart, so it
+// is hidden until the group agrees on one shared formatRwf.
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart' hide formatRwf;
 
 class DriverJobsHeader extends StatelessWidget {
   const DriverJobsHeader({
     super.key,
     required this.district,
-    required this.vehicleType,
+    required this.vehicle,
   });
 
   final String district;
-  final String vehicleType;
+  final Vehicle vehicle;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final vehicleClass = VehicleClasses.of(vehicle.vehicleType);
 
     return AppCard(
       highlighted: true,
@@ -46,7 +50,8 @@ class DriverJobsHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  vehicleTypeLabel(vehicleType),
+                  '${vehicleClass.shortLabel} • '
+                  'Max load ${vehicleClass.capacityLabel}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
