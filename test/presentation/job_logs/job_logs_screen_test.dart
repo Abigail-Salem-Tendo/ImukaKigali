@@ -5,11 +5,12 @@ import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
+import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_summary_card.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
-import 'job_logs_fakes.dart';
+import '../../helpers/fake_repositories.dart';
 
 void main() {
   late FakeDriverJobRepository jobRepo;
@@ -62,6 +63,35 @@ void main() {
     expect(find.text('Jobs you accept will show up here.'), findsOneWidget);
     expect(find.text('Find jobs'), findsOneWidget);
     expect(find.text('Recent dispatch jobs'), findsNothing);
+  });
+
+  testWidgets('shows the error snackbar once, not on every later change', (
+    tester,
+  ) async {
+    await openScreen(tester);
+    jobRepo.myJobs.addError(Exception('Could not load jobs'));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.text('Could not load jobs'),
+      ),
+      findsOneWidget,
+    );
+
+    ScaffoldMessenger.of(tester.element(find.byType(Scaffold)))
+        .clearSnackBars();
+    await tester.pumpAndSettle();
+
+    // A new state whose status is still failure must not repeat the snackbar.
+    tester
+        .element(find.byType(Scaffold))
+        .read<JobLogsBloc>()
+        .add(const JobLogsPeriodChanged(JobLogsPeriod.thisWeek));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets('shows my jobs, and This Week changes the list and summary', (

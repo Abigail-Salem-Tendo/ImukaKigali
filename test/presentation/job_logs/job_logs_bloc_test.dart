@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_bloc.dart';
 
-import 'job_logs_fakes.dart';
+import '../../helpers/fake_repositories.dart';
 
 void main() {
   late FakeDriverJobRepository jobRepo;

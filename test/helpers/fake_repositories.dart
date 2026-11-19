@@ -49,10 +49,19 @@ AppUser testUser(
   );
 }
 
-/// The test pushes job lists into [myJobs] to act like Firestore updates.
+/// The test pushes job lists into [myJobs] and [openJobs] to act like
+/// Firestore updates.
 class FakeDriverJobRepository implements DriverJobRepository {
   final myJobs = StreamController<List<MoveRequest>>();
+  final openJobs = StreamController<List<MoveRequest>>();
   String? watchedDriverId;
+  String? watchedVehicleType;
+
+  final List<String> acceptedIds = [];
+  String? acceptError;
+
+  /// When set, acceptJob waits for it, so a test can look at the loading state.
+  Completer<void>? acceptGate;
 
   @override
   Stream<List<MoveRequest>> watchMyJobs(String driverId) {
@@ -61,11 +70,17 @@ class FakeDriverJobRepository implements DriverJobRepository {
   }
 
   @override
-  Stream<List<MoveRequest>> watchOpenJobs(String vehicleType) =>
-      const Stream.empty();
+  Stream<List<MoveRequest>> watchOpenJobs(String vehicleType) {
+    watchedVehicleType = vehicleType;
+    return openJobs.stream;
+  }
 
   @override
-  Future<void> acceptJob(String requestId) async {}
+  Future<void> acceptJob(String requestId) async {
+    acceptedIds.add(requestId);
+    await acceptGate?.future;
+    if (acceptError != null) throw Exception(acceptError);
+  }
 }
 
 class FakeAuthRepository implements AuthRepository {
