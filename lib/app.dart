@@ -9,6 +9,9 @@ import 'package:imuka_kigali/data/repositories/driver_job_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+import 'package:imuka_kigali/data/repositories/request_repository_impl.dart';
+import 'package:imuka_kigali/domain/repositories/request_repository.dart';
+
 
 /// Root widget. When a repository or the global blocs exist, wrap [AppView]
 /// here with MultiRepositoryProvider (one line per repository) and
@@ -24,6 +27,7 @@ class App extends StatelessWidget {
         RepositoryProvider<DriverJobRepository>(
           create: (_) => DriverJobRepositoryImpl(),
         ),
+        RepositoryProvider<RequestRepository>(create: (_) => RequestRepositoryImpl()),
       ],
       child: MultiBlocProvider(
         providers: [
