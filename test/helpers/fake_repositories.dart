@@ -4,8 +4,10 @@ import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/domain/entities/move_request.dart';
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
+import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 
 const driverId = 'driver1';
 
@@ -46,6 +48,16 @@ AppUser testUser(
     email: '$uid@example.com',
     district: 'Gasabo',
     createdAt: DateTime(2026),
+  );
+}
+
+Vehicle testVehicle({String vehicleType = VehicleTypes.pickup}) {
+  return Vehicle(
+    id: 'vehicle1',
+    driverId: driverId,
+    vehicleType: vehicleType,
+    plateNumber: 'RAD 428 E',
+    capacityKg: 1500,
   );
 }
 
@@ -121,4 +133,29 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> updateUser(AppUser user) => throw UnimplementedError();
+}
+
+class FakeVehicleRepository implements VehicleRepository {
+  Vehicle? vehicle;
+  String? getVehicleError;
+  String? requestedDriverId;
+
+  @override
+  Future<Vehicle?> getVehicle(String driverId) async {
+    requestedDriverId = driverId;
+    if (getVehicleError != null) throw Exception(getVehicleError);
+    return vehicle;
+  }
+
+  @override
+  Future<Vehicle> addVehicle({
+    required String vehicleType,
+    required String plateNumber,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> updateVehicle(Vehicle vehicle) => throw UnimplementedError();
+
+  @override
+  Future<void> deleteVehicle(String vehicleId) => throw UnimplementedError();
 }
