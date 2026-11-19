@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:imuka_kigali/core/router/app_router.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/data/repositories/auth_repository_impl.dart';
+import 'package:imuka_kigali/data/repositories/driver_job_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
+import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
 /// Root widget. When a repository or the global blocs exist, wrap [AppView]
@@ -19,6 +21,9 @@ class App extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthRepository>(create: (_) => AuthRepositoryImpl()),
+        RepositoryProvider<DriverJobRepository>(
+          create: (_) => DriverJobRepositoryImpl(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
