@@ -56,7 +56,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   // (788 123 456). We save the full number, the same way driver
   // registration does: "+250788123456".
   String _fullPhone() {
-    return '+250${Validators.normalizePhone(_phoneController.text)}';
+    var digits = Validators.normalizePhone(_phoneController.text);
+    // Many people type their number the local way ("0788 123 456") or
+    // with the code ("250 788…"). Remove that start so "+250" isn't
+    // added twice.
+    if (digits.startsWith('+250')) {
+      digits = digits.substring(4);
+    } else if (digits.startsWith('250')) {
+      digits = digits.substring(3);
+    } else if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    return '+250$digits';
   }
 
   void _createAccount() {
