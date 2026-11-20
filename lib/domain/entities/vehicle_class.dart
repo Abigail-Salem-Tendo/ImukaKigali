@@ -41,7 +41,7 @@ class VehicleClass {
   double get ratePerMinute => Pricing.ratePerMinute[type] ?? 0;
 
   /// The price per minute as text, for example "90 RWF / min".
-  String get rateLabel => '${formatRwf(ratePerMinute.round())} / min';
+  String get rateLabel => '${_formatRwf(ratePerMinute.round())} / min';
 
   /// The capacity as text, for example "350 kg" or "1.5 t".
   String get capacityLabel {
@@ -120,7 +120,7 @@ const Map<String, String> kigaliHubDistricts = {
 };
 
 /// Writes an amount of money the Rwandan way: 24000 becomes "24,000 RWF".
-String formatRwf(int amount) {
+String _formatRwf(int amount) {
   final digits = amount.abs().toString();
   final buffer = StringBuffer();
   for (var i = 0; i < digits.length; i++) {
