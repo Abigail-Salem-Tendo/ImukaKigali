@@ -1,7 +1,5 @@
 // Owner: Member 2
 // abstract class SettingsRepository: loadSettings, saveThemeMode, saveNotifications, saveDefaultDistrict.
-// Owner: Member 2
-// abstract class SettingsRepository: loadSettings, saveThemeMode, saveNotifications, saveDefaultDistrict.
 import 'package:flutter/material.dart' show ThemeMode;
 
 /// The three districts of Kigali a user can pick as their default area.

@@ -8,6 +8,7 @@ import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
+import 'package:imuka_kigali/presentation/screens/settings/settings_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
 /// the real screen (change only your own lines to avoid merge conflicts).
@@ -24,7 +25,10 @@ final GoRouter appRouter = GoRouter(
     _placeholder(AppRoutes.driverRegister1, 'Driver registration: step 1'),
     _placeholder(AppRoutes.driverRegister2, 'Driver registration: step 2'),
     _placeholder(AppRoutes.driverProfile, 'Driver profile'),
-    _placeholder(AppRoutes.settings, 'Settings'),
+    GoRoute(
+      path: AppRoutes.settings,
+      builder: (_, _) => const SettingsScreen(),
+    ),
     _placeholder(AppRoutes.whereFromTo, 'Where from, where to'),
     _placeholder(AppRoutes.itemDetails, 'Item details'),
     _placeholder(AppRoutes.findingDriver, 'Finding your driver'),

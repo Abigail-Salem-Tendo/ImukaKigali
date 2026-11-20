@@ -1,7 +1,5 @@
 // Owner: Member 2
 // Screen: Settings (theme, notifications, default district) (StatelessWidget, template: ARCHITECTURE.md Part 5)
-// Owner: Member 2
-// Screen: Settings (theme, notifications, default district) (StatelessWidget, template: ARCHITECTURE.md Part 5)
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
@@ -27,7 +25,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<SettingsBloc, SettingsState>(
       listenWhen: (previous, current) =>
-      current.status == SettingsStatus.failure,
+          current.status == SettingsStatus.failure,
       listener: (context, state) =>
           _showError(context, state.error ?? 'Something went wrong.'),
       child: Scaffold(

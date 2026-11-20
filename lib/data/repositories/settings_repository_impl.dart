@@ -1,7 +1,5 @@
 // Owner: Member 2
 // SettingsRepositoryImpl implements SettingsRepository using shared_preferences.
-// Owner: Member 2
-// SettingsRepositoryImpl implements SettingsRepository using shared_preferences.
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:imuka_kigali/core/constants/pref_keys.dart';
 import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
@@ -31,20 +29,20 @@ class SettingsRepositoryImpl implements SettingsRepository {
     // The theme is saved as a word: "system", "light" or "dark".
     final savedTheme = prefs.getString(PrefKeys.themeMode);
     final themeMode = ThemeMode.values.firstWhere(
-          (mode) => mode.name == savedTheme,
+      (mode) => mode.name == savedTheme,
       orElse: () => defaults.themeMode,
     );
 
     final savedDistrict = prefs.getString(PrefKeys.defaultDistrict);
     final district =
-    savedDistrict != null && kigaliDistricts.contains(savedDistrict)
+        savedDistrict != null && kigaliDistricts.contains(savedDistrict)
         ? savedDistrict
         : defaults.defaultDistrict;
 
     return AppSettings(
       themeMode: themeMode,
       notificationsEnabled:
-      prefs.getBool(PrefKeys.notificationsEnabled) ??
+          prefs.getBool(PrefKeys.notificationsEnabled) ??
           defaults.notificationsEnabled,
       defaultDistrict: district,
     );

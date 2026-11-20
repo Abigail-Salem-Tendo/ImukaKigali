@@ -1,7 +1,5 @@
 // Owner: Member 2
 // Bloc: GLOBAL SettingsBloc - loads/saves SharedPreferences, controls themeMode (template: ARCHITECTURE.md Part 5)
-// Owner: Member 2
-// Bloc: GLOBAL SettingsBloc - loads/saves SharedPreferences, controls themeMode (template: ARCHITECTURE.md Part 5)
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,9 +25,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   /// Reads the saved settings from the phone and puts them in the state.
   /// If reading fails, the defaults stay and an error message is set.
   Future<void> _onLoaded(
-      SettingsLoaded event,
-      Emitter<SettingsState> emit,
-      ) async {
+    SettingsLoaded event,
+    Emitter<SettingsState> emit,
+  ) async {
     emit(state.copyWith(status: SettingsStatus.loading));
     try {
       final saved = await _repo.loadSettings();
@@ -54,9 +52,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   /// Shows the new theme at once, then saves it. If saving fails, it
   /// puts the old theme back and sets an error message.
   Future<void> _onThemeModeChanged(
-      ThemeModeChanged event,
-      Emitter<SettingsState> emit,
-      ) async {
+    ThemeModeChanged event,
+    Emitter<SettingsState> emit,
+  ) async {
     final previous = state.themeMode;
     emit(
       state.copyWith(
@@ -80,9 +78,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   /// Shows the new switch position at once, then saves it. If saving
   /// fails, it puts the old position back and sets an error message.
   Future<void> _onNotificationsToggled(
-      NotificationsToggled event,
-      Emitter<SettingsState> emit,
-      ) async {
+    NotificationsToggled event,
+    Emitter<SettingsState> emit,
+  ) async {
     final previous = state.notificationsEnabled;
     emit(
       state.copyWith(
@@ -106,9 +104,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   /// Shows the new district at once, then saves it. If saving fails, it
   /// puts the old district back and sets an error message.
   Future<void> _onDefaultDistrictChanged(
-      DefaultDistrictChanged event,
-      Emitter<SettingsState> emit,
-      ) async {
+    DefaultDistrictChanged event,
+    Emitter<SettingsState> emit,
+  ) async {
     final previous = state.defaultDistrict;
     emit(
       state.copyWith(

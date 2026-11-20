@@ -106,26 +106,29 @@ void main() {
     expect(repo.saved.themeMode, ThemeMode.dark);
   });
 
-  test('puts the old theme back and reports an error if saving fails', () async {
-    repo.failOnSave = true;
+  test(
+    'puts the old theme back and reports an error if saving fails',
+    () async {
+      repo.failOnSave = true;
 
-    final states = expectLater(
-      bloc.stream,
-      emitsInOrder(const [
-        SettingsState(
-          status: SettingsStatus.success,
-          themeMode: ThemeMode.dark,
-        ),
-        SettingsState(
-          status: SettingsStatus.failure,
-          themeMode: ThemeMode.system,
-          error: 'Could not save the theme. Please try again.',
-        ),
-      ]),
-    );
-    bloc.add(const ThemeModeChanged(ThemeMode.dark));
-    await states;
-  });
+      final states = expectLater(
+        bloc.stream,
+        emitsInOrder(const [
+          SettingsState(
+            status: SettingsStatus.success,
+            themeMode: ThemeMode.dark,
+          ),
+          SettingsState(
+            status: SettingsStatus.failure,
+            themeMode: ThemeMode.system,
+            error: 'Could not save the theme. Please try again.',
+          ),
+        ]),
+      );
+      bloc.add(const ThemeModeChanged(ThemeMode.dark));
+      await states;
+    },
+  );
 
   test('turns notifications off and saves it', () async {
     final states = expectLater(
