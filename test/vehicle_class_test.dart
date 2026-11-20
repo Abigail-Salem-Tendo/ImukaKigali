@@ -34,10 +34,7 @@ void main() {
 
     test('every class reads its price from Pricing', () {
       for (final vehicleClass in VehicleClasses.all) {
-        expect(
-          vehicleClass.ratePerMinute,
-          Pricing.ratePerMinute[vehicleClass.type],
-        );
+        expect(vehicleClass.ratePerKm, Pricing.ratePerKm[vehicleClass.type]);
       }
     });
 
@@ -54,6 +51,15 @@ void main() {
       expect(VehicleClasses.of(VehicleTypes.tricycle).capacityLabel, '350 kg');
       expect(VehicleClasses.of(VehicleTypes.pickup).capacityLabel, '1.5 t');
       expect(VehicleClasses.of(VehicleTypes.van).capacityLabel, '3 t');
+    });
+
+    test('writes the rate per km with a comma every 3 digits', () {
+      for (final vehicleClass in VehicleClasses.all) {
+        expect(
+          vehicleClass.rateLabel,
+          matches(RegExp(r'^\d{1,3}(,\d{3})* RWF / km$')),
+        );
+      }
     });
   });
 
