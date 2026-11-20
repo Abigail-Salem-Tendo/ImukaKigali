@@ -63,14 +63,31 @@ void main() {
 
   setUp(() => repo = _RecordingAuthRepository());
 
+  // Like the real app: the session check runs first (nobody is signed in
+  // here), and the form appears once it has finished.
   Future<void> showLoginScreen(WidgetTester tester) async {
+    await tester.pumpWidget(
+      BlocProvider(
+        create: (_) => AuthBloc(repo)..add(const AuthCheckRequested()),
+        child: MaterialApp(theme: AppTheme.light, home: const LoginScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('shows a spinner, not the form, while checking the session', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       BlocProvider(
         create: (_) => AuthBloc(repo),
         child: MaterialApp(theme: AppTheme.light, home: const LoginScreen()),
       ),
     );
-  }
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Welcome Back'), findsNothing);
+  });
 
   // The fields are found by order: email first, password second.
   Finder emailField() => find.byType(TextFormField).at(0);

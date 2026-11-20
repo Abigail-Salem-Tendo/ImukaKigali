@@ -69,6 +69,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final textTheme = Theme.of(context).textTheme;
     final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
+    // The app opens on this page while it checks for a saved session.
+    // Showing the form then would flash it for users who are already
+    // signed in, so a spinner is shown until we know who the user is.
+    final checkingSession = context.select(
+      (AuthBloc bloc) => bloc.state.status == AuthStatus.unknown,
+    );
+    if (checkingSession) {
+      return const Scaffold(body: LoadingView());
+    }
+
     return BlocListener<AuthBloc, AuthState>(
       // AuthState drops error and message on the next state, so each one
       // reaches this listener once and the snackbar never repeats.
