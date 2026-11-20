@@ -85,52 +85,68 @@ class _FindingDriverView extends StatelessWidget {
           body: SafeArea(
             child: BlocBuilder<FindingDriverBloc, FindingDriverState>(
               builder: (context, state) {
-                final request = state.request;
-                if (state.status == FindingDriverStatus.failure &&
-                    request == null) {
-                  return Center(
-                    child: Text(state.error ?? 'Something went wrong'),
+                if (state.status == FindingDriverStatus.failure) {
+                  return _LoadError(
+                    message: state.error ?? 'Something went wrong',
                   );
                 }
+                final request = state.request;
                 if (request == null) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    children: [
-                      const Spacer(),
-                      const PulseAnimation(),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        'Finding your driver',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                final theme = Theme.of(context);
+                return LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight - AppSpacing.md * 2,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'The first available driver will take your job.',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              const PulseAnimation(),
+                              const SizedBox(height: AppSpacing.lg),
+                              Text(
+                                'Finding your driver',
+                                style: theme.textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                'The first available driver will take your job.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _TripSummary(request: request),
+                              const SizedBox(height: AppSpacing.md),
+                              SizedBox(
+                                height: AppSpacing.buttonHeight,
+                                child: OutlinedButton(
+                                  onPressed: state.cancelling
+                                      ? null
+                                      : () => _confirmCancel(context),
+                                  child: state.cancelling
+                                      ? const SizedBox.square(
+                                          dimension: AppSpacing.lg,
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : const Text('Cancel request'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const Spacer(),
-                      _TripSummary(request: request),
-                      const SizedBox(height: AppSpacing.md),
-                      SizedBox(
-                        width: double.infinity,
-                        height: AppSpacing.buttonHeight,
-                        child: OutlinedButton(
-                          onPressed: state.cancelling
-                              ? null
-                              : () => _confirmCancel(context),
-                          child: state.cancelling
-                              ? const SizedBox.square(
-                                  dimension: AppSpacing.lg,
-                                  child: CircularProgressIndicator(),
-                                )
-                              : const Text('Cancel request'),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -142,13 +158,49 @@ class _FindingDriverView extends StatelessWidget {
   }
 }
 
+class _LoadError extends StatelessWidget {
+  const _LoadError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: AppSpacing.md),
+            FilledButton(
+              onPressed: () => context.read<FindingDriverBloc>().add(
+                const FindingDriverStarted(),
+              ),
+              child: const Text('Try again'),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.whereFromTo),
+              child: const Text('Back to start'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TripSummary extends StatelessWidget {
   const _TripSummary({required this.request});
 
   final MoveRequest request;
 
-  String get _vehicle =>
-      request.vehicleType[0].toUpperCase() + request.vehicleType.substring(1);
+  String get _vehicle {
+    final type = request.vehicleType;
+    if (type.isEmpty) return '';
+    return type[0].toUpperCase() + type.substring(1);
+  }
 
   @override
   Widget build(BuildContext context) {
