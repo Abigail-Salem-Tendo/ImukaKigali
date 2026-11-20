@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
 import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
+import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
 
@@ -18,10 +19,14 @@ class ItemDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return BlocListener<CreateRequestBloc, CreateRequestState>(
+      // Only react when the status changes, not on every keystroke.
+      listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
         if (state.status == CreateRequestStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error ?? 'Something went wrong')),
+          showAppSnackBar(
+            context,
+            state.error ?? 'Something went wrong',
+            type: SnackBarType.error,
           );
         }
         if (state.status == CreateRequestStatus.success &&
@@ -34,6 +39,12 @@ class ItemDetailsScreen extends StatelessWidget {
         body: SafeArea(
           child: BlocBuilder<CreateRequestBloc, CreateRequestState>(
             builder: (context, state) {
+              final pickup = state.pickup;
+              final dropoff = state.dropoff;
+              // Opened without a route (hot restart, deep link): start over.
+              if (pickup == null || dropoff == null) {
+                return const _BackToStart();
+              }
               final bloc = context.read<CreateRequestBloc>();
               final amount = state.proposedAmount;
               return SingleChildScrollView(
@@ -42,7 +53,7 @@ class ItemDetailsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      '${state.pickup?.name} to ${state.dropoff?.name}',
+                      '${pickup.name} to ${dropoff.name}',
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -89,28 +100,27 @@ class ItemDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    SizedBox(
-                      height: AppSpacing.buttonHeight,
-                      child: FilledButton(
-                        onPressed: state.canSubmit
-                            ? () {
-                                final uid = context
-                                    .read<AuthBloc>()
-                                    .state
-                                    .user
-                                    ?.uid;
-                                if (uid != null) {
-                                  bloc.add(RequestSubmitted(uid));
-                                }
+                    AppButton(
+                      label: 'Find a driver',
+                      isLoading: state.status == CreateRequestStatus.submitting,
+                      onPressed: state.canSubmit
+                          ? () {
+                              final uid = context
+                                  .read<AuthBloc>()
+                                  .state
+                                  .user
+                                  ?.uid;
+                              if (uid == null) {
+                                showAppSnackBar(
+                                  context,
+                                  'Please sign in again',
+                                  type: SnackBarType.error,
+                                );
+                                return;
                               }
-                            : null,
-                        child: state.status == CreateRequestStatus.submitting
-                            ? const SizedBox.square(
-                                dimension: AppSpacing.lg,
-                                child: CircularProgressIndicator(),
-                              )
-                            : const Text('Find a driver'),
-                      ),
+                              bloc.add(RequestSubmitted(uid));
+                            }
+                          : null,
                     ),
                   ],
                 ),
@@ -120,5 +130,18 @@ class ItemDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Sends the user back to where_from_to when there is no route to show.
+class _BackToStart extends StatelessWidget {
+  const _BackToStart();
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) context.go(AppRoutes.whereFromTo);
+    });
+    return const LoadingView();
   }
 }
