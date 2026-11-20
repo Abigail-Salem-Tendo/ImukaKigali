@@ -21,7 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AppUser?> getCurrentUser() async {
-    // The first event is the restored session (orr null), so a returning user
+    // The first event is the restored session (or null), so a returning user
     // is found even if Firebase has not finished loading it yet.
     final firebaseUser = await _auth.authStateChanges().first;
     if (firebaseUser == null) return null;

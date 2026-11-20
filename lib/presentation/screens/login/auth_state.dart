@@ -35,7 +35,7 @@ class AuthState extends Equatable {
   /// A readable error to show in a snackbar. Cleared on the next state.
   final String? error;
 
-  /// A readable success message . Cleared on the next state.
+  /// A readable success message. Cleared on the next state.
   final String? message;
 
   bool get isClient => user?.role == UserRoles.client;

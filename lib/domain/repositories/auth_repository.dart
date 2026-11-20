@@ -14,9 +14,9 @@ abstract class AuthRepository {
   Future<AppUser> signIn({required String email, required String password});
 
   /// Creates the login account and the user's 'users' document, leaves
-  /// them siGned in, and emails them a link to verify their address.
+  /// them signed in, and emails them a link to verify their address.
   /// [role] is UserRoles.client or UserRoles.driver.
-  /// Throws an Exception with a readble message on failure.
+  /// Throws an Exception with a readable message on failure.
   Future<AppUser> register({
     required String fullName,
     required String email,
@@ -43,6 +43,6 @@ abstract class AuthRepository {
   /// Returns null if there is no such user.
   Future<AppUser?> getUser(String uid);
 
-  /// Saves changes to the signedin user's own profile.
+  /// Saves changes to the signed-in user's own profile.
   Future<void> updateUser(AppUser user);
 }
