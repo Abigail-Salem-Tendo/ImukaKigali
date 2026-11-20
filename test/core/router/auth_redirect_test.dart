@@ -55,10 +55,44 @@ void main() {
       );
     });
 
-    test('can open any other page', () {
+    test('can open the pages of their own role', () {
+      expect(
+        authRedirect(_signedInAs(UserRoles.driver), AppRoutes.jobLogs),
+        isNull,
+      );
+      expect(
+        authRedirect(_signedInAs(UserRoles.client), AppRoutes.itemDetails),
+        isNull,
+      );
+    });
+
+    test('is sent home from the registration steps', () {
+      expect(
+        authRedirect(_signedInAs(UserRoles.driver), AppRoutes.driverRegister1),
+        AppRoutes.driverHome,
+      );
+    });
+
+    test('a client is sent away from driver pages', () {
+      expect(
+        authRedirect(_signedInAs(UserRoles.client), AppRoutes.driverHome),
+        AppRoutes.whereFromTo,
+      );
+    });
+
+    test('a driver is sent away from client pages', () {
       final driver = _signedInAs(UserRoles.driver);
-      expect(authRedirect(driver, AppRoutes.jobLogs), isNull);
-      expect(authRedirect(driver, AppRoutes.driverRegister2), isNull);
+      expect(authRedirect(driver, AppRoutes.whereFromTo), AppRoutes.driverHome);
+      expect(
+        authRedirect(driver, AppRoutes.findingDriverPath('abc123')),
+        AppRoutes.driverHome,
+      );
+    });
+
+    test('both roles can open shared pages', () {
+      final path = AppRoutes.deliveryPath('abc123');
+      expect(authRedirect(_signedInAs(UserRoles.client), path), isNull);
+      expect(authRedirect(_signedInAs(UserRoles.driver), path), isNull);
     });
 
     test('leaves the inbox page once the email is verified', () {

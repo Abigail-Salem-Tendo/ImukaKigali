@@ -5,8 +5,10 @@
 import '../../presentation/screens/login/auth_bloc.dart';
 import '../constants/app_routes.dart';
 
-/// Pages a signed-out user can open.
-const _publicPages = [
+/// The only pages a signed-out user can open. They are also the pages a
+/// signed-in user has no reason to see: the registration steps would
+/// create a second account.
+const _signedOutPages = [
   AppRoutes.login,
   AppRoutes.createAccount,
   AppRoutes.driverPartner,
@@ -14,27 +16,33 @@ const _publicPages = [
   AppRoutes.driverRegister2,
 ];
 
-/// Pages that only make sense before logging in. A signed-in user who
-/// lands on one of them is sent to their home screen instead.
-///
-/// The driver registration steps are not listed on purpose: Liliane's flow
-/// creates the account on step 2 and moves the new driver on by itself.
-const _signedOutOnlyPages = [
-  AppRoutes.login,
-  AppRoutes.createAccount,
-  AppRoutes.driverPartner,
+/// Pages only drivers use.
+const _driverPages = [
+  AppRoutes.driverHome,
+  AppRoutes.driverJobs,
+  AppRoutes.jobLogs,
+  AppRoutes.driverProfile,
 ];
+
+/// Pages only clients use.
+bool _isClientPage(String location) {
+  // Finding-driver paths end with a request id (/finding-driver/abc123),
+  // so they are matched by their start, not compared whole.
+  return location == AppRoutes.whereFromTo ||
+      location == AppRoutes.itemDetails ||
+      location.startsWith(AppRoutes.findingDriverPath(''));
+}
 
 /// Returns the path to go to instead of [location], or null to stay.
 String? authRedirect(AuthState auth, String location) {
   // While the saved session is still being checked we don't know yet who
-  // the user is, so we wait instead of flashing the wrong screen.
+  // the user is, so we wait. The login screen shows a spinner meanwhile.
   if (auth.status == AuthStatus.unknown) {
     return null;
   }
 
   if (auth.status == AuthStatus.unauthenticated) {
-    if (_publicPages.contains(location)) {
+    if (_signedOutPages.contains(location)) {
       return null;
     }
     return AppRoutes.login;
@@ -52,8 +60,14 @@ String? authRedirect(AuthState auth, String location) {
 
   // Verified. The inbox page has done its job, so it counts as a page
   // they no longer need, like login.
-  if (_signedOutOnlyPages.contains(location) ||
-      location == AppRoutes.verifyEmail) {
+  if (_signedOutPages.contains(location) || location == AppRoutes.verifyEmail) {
+    return homeFor(auth);
+  }
+  // Each role stays on its own side of the app.
+  if (auth.isDriver && _isClientPage(location)) {
+    return homeFor(auth);
+  }
+  if (auth.isClient && _driverPages.contains(location)) {
     return homeFor(auth);
   }
   return null;
