@@ -14,7 +14,7 @@
 //   AppTextField(label: 'Secure Password', isPassword: true, validator: Validators.password)
 //
 // It is a StatefulWidget only to hold the show/hide-password notifier
-// (allowed by Rule 2: no setState is used).
+// (allowed by team rule 2: the widget never rebuilds itself by hand).
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
