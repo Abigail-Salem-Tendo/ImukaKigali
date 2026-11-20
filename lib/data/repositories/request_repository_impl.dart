@@ -17,7 +17,10 @@ class RequestRepositoryImpl implements RequestRepository {
   @override
   Future<String> createRequest(MoveRequest request) async {
     try {
-      final ref = await _requests.add(request.toMap());
+      final ref = await _requests.add({
+        ...request.toMap(),
+        Fields.createdAt: FieldValue.serverTimestamp(),
+      });
       return ref.id;
     } on FirebaseException catch (e) {
       throw Exception(e.message ?? 'Could not create the request');
@@ -73,7 +76,10 @@ class RequestRepositoryImpl implements RequestRepository {
     try {
       await _db.runTransaction((tx) async {
         final snap = await tx.get(ref);
-        if (snap.get(Fields.status) != RequestStatus.open) {
+        if (!snap.exists) {
+          throw Exception('Request not found');
+        }
+        if (snap.data()?[Fields.status] != RequestStatus.open) {
           throw Exception('This request can no longer be cancelled');
         }
         tx.update(ref, {Fields.status: RequestStatus.cancelled});

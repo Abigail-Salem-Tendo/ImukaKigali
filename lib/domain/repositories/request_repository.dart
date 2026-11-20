@@ -1,5 +1,5 @@
 // Owner: Member 3
-// abstract class RequestRepository: createRequest, watchMyRequests, getRequest, updateRequest, cancelRequest, acceptBid.
+// abstract class RequestRepository: createRequest, watchMyRequests, getRequest, updateRequest, cancelRequest
 import 'package:imuka_kigali/domain/entities/move_request.dart';
 
 /// Everything the app can do with the `requests` collection from the client
