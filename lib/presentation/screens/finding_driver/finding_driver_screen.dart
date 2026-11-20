@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
+import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/domain/entities/move_request.dart';
 import 'package:imuka_kigali/domain/repositories/request_repository.dart';
 import 'package:imuka_kigali/presentation/screens/finding_driver/finding_driver_bloc.dart';
@@ -38,13 +39,14 @@ class _FindingDriverView extends StatelessWidget {
         title: const Text('Cancel this request?'),
         content: const Text('We will stop looking for a driver.'),
         actions: [
-          TextButton(
+          AppButton.text(
+            label: 'Keep waiting',
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Keep waiting'),
           ),
-          FilledButton(
+          AppButton.danger(
+            label: 'Cancel request',
+            expand: false,
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Cancel request'),
           ),
         ],
       ),
@@ -70,8 +72,7 @@ class _FindingDriverView extends StatelessWidget {
           listenWhen: (prev, curr) =>
               curr.error != null && prev.error != curr.error,
           listener: (context, state) =>
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(state.error!))),
+              showAppSnackBar(context, state.error!, type: SnackBarType.error),
         ),
       ],
       // The client must cancel explicitly instead of backing out.
@@ -86,13 +87,18 @@ class _FindingDriverView extends StatelessWidget {
             child: BlocBuilder<FindingDriverBloc, FindingDriverState>(
               builder: (context, state) {
                 if (state.status == FindingDriverStatus.failure) {
-                  return _LoadError(
-                    message: state.error ?? 'Something went wrong',
+                  return EmptyState.error(
+                    message: state.error,
+                    onRetry: () => context.read<FindingDriverBloc>().add(
+                      const FindingDriverStarted(),
+                    ),
+                    secondaryActionLabel: 'Back to start',
+                    onSecondaryAction: () => context.go(AppRoutes.whereFromTo),
                   );
                 }
                 final request = state.request;
                 if (request == null) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const LoadingView();
                 }
                 final theme = Theme.of(context);
                 return LayoutBuilder(
@@ -128,19 +134,11 @@ class _FindingDriverView extends StatelessWidget {
                             children: [
                               _TripSummary(request: request),
                               const SizedBox(height: AppSpacing.md),
-                              SizedBox(
-                                height: AppSpacing.buttonHeight,
-                                child: OutlinedButton(
-                                  onPressed: state.cancelling
-                                      ? null
-                                      : () => _confirmCancel(context),
-                                  child: state.cancelling
-                                      ? const SizedBox.square(
-                                          dimension: AppSpacing.lg,
-                                          child: CircularProgressIndicator(),
-                                        )
-                                      : const Text('Cancel request'),
-                                ),
+                              AppButton.danger(
+                                label: 'Cancel request',
+                                icon: Icons.close,
+                                isLoading: state.cancelling,
+                                onPressed: () => _confirmCancel(context),
                               ),
                             ],
                           ),
@@ -152,39 +150,6 @@ class _FindingDriverView extends StatelessWidget {
               },
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadError extends StatelessWidget {
-  const _LoadError({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.md),
-            FilledButton(
-              onPressed: () => context.read<FindingDriverBloc>().add(
-                const FindingDriverStarted(),
-              ),
-              child: const Text('Try again'),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextButton(
-              onPressed: () => context.go(AppRoutes.whereFromTo),
-              child: const Text('Back to start'),
-            ),
-          ],
         ),
       ),
     );
