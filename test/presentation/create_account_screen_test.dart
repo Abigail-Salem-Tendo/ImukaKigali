@@ -69,6 +69,19 @@ void main() {
     expect(user.district, 'Kicukiro');
   });
 
+  for (final typed in ['0788 123 456', '250 788 123 456', '+250788123456']) {
+    testWidgets('phone typed as "$typed" is saved as +250788123456', (
+      tester,
+    ) async {
+      await showScreen(tester);
+      await fillValidForm(tester);
+      await tester.enterText(field(phone), typed);
+      await tapText(tester, 'Create Mover Account');
+
+      expect(repo.registeredUsers.single.phone, '+250788123456');
+    });
+  }
+
   testWidgets('different passwords are caught before sign-up', (tester) async {
     await showScreen(tester);
     await fillValidForm(tester);
