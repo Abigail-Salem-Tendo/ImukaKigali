@@ -121,8 +121,11 @@ class AuthRepositoryImpl implements AuthRepository {
       // Firebase remembers the user as they were at login. reload() fetches
       // them again, so a link clicked a moment ago is seen.
       await user.reload();
-    } on FirebaseAuthException catch (e) {
-      throw Exception(_readable(e));
+    } on FirebaseAuthException {
+      // reload() needs internet. Every sign-in asks this question, so
+      // failing here would log people out (or break a sign-up that worked)
+      // just because they are offline. The last known answer is used instead.
+      return user.emailVerified;
     }
     // Read currentUser again: reload() refreshes Firebase's copy, not the
     // old `user` object we are holding.

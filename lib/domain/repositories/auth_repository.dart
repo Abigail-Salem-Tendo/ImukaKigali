@@ -34,6 +34,7 @@ abstract class AuthRepository {
 
   /// Whether the signed-in user has clicked the link in that email.
   /// Asks Firebase again each time, so it notices a link clicked just now.
+  /// Offline, it answers with the last known status instead of failing.
   Future<bool> isEmailVerified();
 
   Future<void> signOut();
