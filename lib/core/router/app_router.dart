@@ -1,16 +1,24 @@
 /// setup routes  one route per screen; clients and drivers land on different home screens
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
+import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
+import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
 /// the real screen (change only your own lines to avoid merge conflicts).
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.login,
+  // Runs before every navigation, and again when app.dart calls
+  // appRouter.refresh() after a login or logout.
+  redirect: (context, state) =>
+      authRedirect(context.read<AuthBloc>().state, state.matchedLocation),
   routes: [
-    _placeholder(AppRoutes.login, 'Login'),
+    GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
     _placeholder(AppRoutes.createAccount, 'Create account'),
     _placeholder(AppRoutes.driverPartner, 'Driver partner registration'),
     _placeholder(AppRoutes.driverRegister1, 'Driver registration: step 1'),
