@@ -1,0 +1,174 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:imuka_kigali/core/constants/firestore_constants.dart';
+import 'package:imuka_kigali/domain/entities/app_user.dart';
+import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
+import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+
+final _client = AppUser(
+  uid: 'u1',
+  role: UserRoles.client,
+  fullName: 'Diane Uwase',
+  phone: '0781234567',
+  email: 'diane@example.com',
+  district: 'Kicukiro',
+  createdAt: DateTime(2026),
+);
+
+/// In-memory AuthRepository so the bloc can be tested without Firebase.
+class FakeAuthRepository implements AuthRepository {
+  AppUser? signedIn;
+  String? failWith;
+  int signOutCalls = 0;
+  String? resetEmail;
+
+  void _maybeFail() {
+    if (failWith != null) throw Exception(failWith);
+  }
+
+  @override
+  Future<AppUser?> getCurrentUser() async {
+    _maybeFail();
+    return signedIn;
+  }
+
+  @override
+  Future<AppUser> signIn({
+    required String email,
+    required String password,
+  }) async {
+    _maybeFail();
+    return signedIn = _client;
+  }
+
+  @override
+  Future<AppUser> register({
+    required String fullName,
+    required String email,
+    required String phone,
+    required String password,
+    required String role,
+    required String district,
+  }) async {
+    _maybeFail();
+    return signedIn = AppUser(
+      uid: 'new',
+      role: role,
+      fullName: fullName,
+      phone: phone,
+      email: email,
+      district: district,
+      createdAt: DateTime(2026),
+    );
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    _maybeFail();
+    resetEmail = email;
+  }
+
+  @override
+  Future<void> signOut() async {
+    signOutCalls++;
+    signedIn = null;
+  }
+
+  @override
+  Future<AppUser?> getUser(String uid) async => signedIn;
+
+  @override
+  Future<void> updateUser(AppUser user) async => signedIn = user;
+}
+
+void main() {
+  late FakeAuthRepository repo;
+  late AuthBloc bloc;
+
+  setUp(() {
+    repo = FakeAuthRepository();
+    bloc = AuthBloc(repo);
+  });
+  tearDown(() => bloc.close());
+
+  test('starts with an unknown status', () {
+    expect(bloc.state.status, AuthStatus.unknown);
+  });
+
+  test('AuthCheckRequested with no saved session → unauthenticated', () async {
+    bloc.add(const AuthCheckRequested());
+    await expectLater(
+      bloc.stream,
+      emits(const AuthState(status: AuthStatus.unauthenticated)),
+    );
+  });
+
+  test('AuthCheckRequested with a saved session → authenticated', () async {
+    repo.signedIn = _client;
+    bloc.add(const AuthCheckRequested());
+    await expectLater(
+      bloc.stream,
+      emits(AuthState(status: AuthStatus.authenticated, user: _client)),
+    );
+    expect(bloc.state.isClient, isTrue);
+  });
+
+  test('successful login: loading, then authenticated', () async {
+    bloc.add(const LoginSubmitted(email: 'diane@example.com', password: 'x'));
+    await expectLater(
+      bloc.stream,
+      emitsInOrder([
+        const AuthState(isLoading: true),
+        AuthState(status: AuthStatus.authenticated, user: _client),
+      ]),
+    );
+  });
+
+  test('failed login shows a readable error without "Exception:"', () async {
+    repo.failWith = 'Incorrect email or password.';
+    bloc.add(const LoginSubmitted(email: 'diane@example.com', password: 'x'));
+    await expectLater(
+      bloc.stream,
+      emitsInOrder([
+        const AuthState(isLoading: true),
+        const AuthState(error: 'Incorrect email or password.'),
+      ]),
+    );
+  });
+
+  test('register a driver → authenticated as a driver', () async {
+    bloc.add(
+      const RegisterSubmitted(
+        fullName: 'Jean-Claude Mugisha',
+        email: 'jc@example.com',
+        phone: '0788123456',
+        password: 'kigali2026',
+        role: UserRoles.driver,
+        district: 'Gasabo',
+      ),
+    );
+    await bloc.stream.firstWhere((s) => s.status == AuthStatus.authenticated);
+    expect(bloc.state.isDriver, isTrue);
+    expect(bloc.state.user!.fullName, 'Jean-Claude Mugisha');
+  });
+
+  test('password reset sends the email and shows a message', () async {
+    bloc.add(const PasswordResetRequested('diane@example.com'));
+    final done = await bloc.stream.firstWhere((s) => s.message != null);
+    expect(repo.resetEmail, 'diane@example.com');
+    expect(done.message, contains('diane@example.com'));
+  });
+
+  test('logout signs out and clears the user', () async {
+    repo.signedIn = _client;
+    bloc.add(const AuthCheckRequested());
+    await bloc.stream.firstWhere((s) => s.status == AuthStatus.authenticated);
+
+    bloc.add(const LogoutRequested());
+    await expectLater(
+      bloc.stream,
+      emits(const AuthState(status: AuthStatus.unauthenticated)),
+    );
+    expect(repo.signOutCalls, 1);
+    expect(bloc.state.user, isNull);
+  });
+}
