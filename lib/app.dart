@@ -48,13 +48,20 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Imuka Kigali',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system, // SettingsBloc will provide this later
-      routerConfig: appRouter,
+    // The router only checks its redirect when the user navigates. Logging in
+    // or out doesn't navigate, so we ask it to check again ourselves.
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status || previous.user != current.user,
+      listener: (context, state) => appRouter.refresh(),
+      child: MaterialApp.router(
+        title: 'Imuka Kigali',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: ThemeMode.system, // SettingsBloc will provide this later
+        routerConfig: appRouter,
+      ),
     );
   }
 }

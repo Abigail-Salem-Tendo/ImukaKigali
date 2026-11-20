@@ -5,6 +5,7 @@ export 'app_button.dart';
 export 'app_card.dart';
 export 'app_snack_bar.dart';
 export 'app_text_field.dart';
+export 'brand_header.dart';
 export 'empty_state.dart';
 export 'loading_view.dart';
 export 'status_chip.dart';

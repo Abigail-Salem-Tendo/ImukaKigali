@@ -8,15 +8,32 @@ import 'package:imuka_kigali/presentation/screens/finding_driver/finding_driver_
 import 'package:imuka_kigali/presentation/screens/item_details/item_details_screen.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_screen.dart';
+import 'package:imuka_kigali/core/router/auth_redirect.dart';
+import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
+import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
+import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
 /// the real screen (change only your own lines to avoid merge conflicts).
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.login,
+  // Runs before every navigation, and again when app.dart calls
+  // appRouter.refresh() after a login or logout.
+  redirect: (context, state) =>
+      authRedirect(context.read<AuthBloc>().state, state.matchedLocation),
   routes: [
-    _placeholder(AppRoutes.login, 'Login'),
-    _placeholder(AppRoutes.createAccount, 'Create account'),
-    _placeholder(AppRoutes.driverPartner, 'Driver partner registration'),
+    GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
+    GoRoute(
+      path: AppRoutes.createAccount,
+      builder: (_, _) => const CreateAccountScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.driverPartner,
+      builder: (_, _) => const DriverPartnerRegistrationScreen(),
+    ),
     _placeholder(AppRoutes.driverRegister1, 'Driver registration: step 1'),
     _placeholder(AppRoutes.driverRegister2, 'Driver registration: step 2'),
     _placeholder(AppRoutes.driverProfile, 'Driver profile'),
@@ -44,8 +61,11 @@ final GoRouter appRouter = GoRouter(
           FindingDriverScreen(requestId: state.pathParameters['requestId']!),
     ),
     _placeholder(AppRoutes.driverHome, 'Driver home'),
-    _placeholder(AppRoutes.driverJobs, 'Driver jobs'),
-    _placeholder(AppRoutes.jobLogs, 'Job logs'),
+    GoRoute(
+      path: AppRoutes.driverJobs,
+      builder: (_, _) => const DriverJobsScreen(),
+    ),
+    GoRoute(path: AppRoutes.jobLogs, builder: (_, _) => const JobLogsScreen()),
     _placeholder(AppRoutes.driverContact, 'Driver contact'),
     _placeholder(AppRoutes.delivery, 'Delivery and payment'),
     _placeholder(AppRoutes.rate, 'Rate driver'),
