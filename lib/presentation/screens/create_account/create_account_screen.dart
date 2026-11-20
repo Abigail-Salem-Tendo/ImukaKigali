@@ -9,17 +9,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_routes.dart';
 import '../../../core/constants/firestore_constants.dart';
+import '../../../core/constants/kigali_districts.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/widgets.dart';
 import '../login/auth_bloc.dart';
 
-/// The three Kigali districts, with a few well-known areas in each so the
-/// user can recognise where they live.
-const _districts = {
-  'Gasabo': 'Kimihurura / Kacyiru',
-  'Kicukiro': 'Niboye / Gahanga',
-  'Nyarugenge': 'Kiyovu / Nyamirambo',
+/// A few well-known areas in each district, shown on the cards so the user
+/// can recognise where they live. Only for display: what gets saved is the
+/// district name itself.
+const _knownAreas = {
+  KigaliDistricts.gasabo: 'Kimihurura / Kacyiru',
+  KigaliDistricts.kicukiro: 'Niboye / Gahanga',
+  KigaliDistricts.nyarugenge: 'Kiyovu / Nyamirambo',
 };
 
 class CreateAccountScreen extends StatefulWidget {
@@ -279,8 +281,8 @@ class _DistrictField extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              for (final district in _districts.keys) ...[
-                if (district != _districts.keys.first)
+              for (final district in KigaliDistricts.all) ...[
+                if (district != KigaliDistricts.all.first)
                   const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: AppCard(
@@ -294,7 +296,7 @@ class _DistrictField extends StatelessWidget {
                       children: [
                         Text(district, style: textTheme.labelLarge),
                         Text(
-                          _districts[district]!,
+                          _knownAreas[district]!,
                           textAlign: TextAlign.center,
                           style: textTheme.bodySmall,
                         ),

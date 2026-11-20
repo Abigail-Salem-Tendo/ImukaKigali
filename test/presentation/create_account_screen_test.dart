@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
+import 'package:imuka_kigali/core/constants/kigali_districts.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
@@ -66,7 +67,7 @@ void main() {
     final user = repo.registeredUsers.single;
     expect(user.role, UserRoles.client);
     expect(user.phone, '+250788123456');
-    expect(user.district, 'Kicukiro');
+    expect(user.district, KigaliDistricts.kicukiro);
   });
 
   for (final typed in ['0788 123 456', '250 788 123 456', '+250788123456']) {
