@@ -53,6 +53,7 @@ class DriverHomeScreen extends StatelessWidget {
               ),
             ],
           ),
+          bottomNavigationBar: const DriverBottomNav(current: DriverTab.home),
           body: SafeArea(
             child: BlocBuilder<DriverHomeBloc, DriverHomeState>(
               builder: (context, state) => switch (state.status) {

@@ -72,6 +72,7 @@ class DriverJobsScreen extends StatelessWidget {
         ],
         child: Scaffold(
           appBar: AppBar(centerTitle: false, title: const _JobsTitle()),
+          bottomNavigationBar: const DriverBottomNav(current: DriverTab.jobs),
           body: SafeArea(
             child: BlocBuilder<AcceptJobBloc, AcceptJobState>(
               builder: (context, acceptState) {
