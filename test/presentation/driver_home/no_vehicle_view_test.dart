@@ -6,7 +6,9 @@ import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/presentation/screens/driver_home/no_vehicle_view.dart';
 
 void main() {
-  testWidgets('Register vehicle opens the driver profile', (tester) async {
+  testWidgets('Register vehicle opens the driver profile on top', (
+    tester,
+  ) async {
     final router = GoRouter(
       initialLocation: AppRoutes.driverHome,
       routes: [
@@ -29,9 +31,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Profile page'), findsOneWidget);
-    expect(
-      router.routerDelegate.currentConfiguration.uri.path,
-      AppRoutes.driverProfile,
-    );
+    expect(router.canPop(), isTrue);
   });
 }

@@ -18,8 +18,9 @@ class NoVehicleView extends StatelessWidget {
       actionLabel: 'Register vehicle',
       // Not /driver-register-1: the auth redirect sends signed-in users away
       // from the sign-up steps, and the profile screen is where a signed-in
-      // driver adds a vehicle.
-      onAction: () => context.go(AppRoutes.driverProfile),
+      // driver adds a vehicle. Pushed, because the profile screen has no
+      // bottom navigation to come back with.
+      onAction: () => context.push(AppRoutes.driverProfile),
     );
   }
 }
