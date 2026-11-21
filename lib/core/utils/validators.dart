@@ -59,7 +59,7 @@ class Validators {
     final v = normalizePhone(value ?? '');
     if (v.isEmpty) return 'Phone number is required';
     if (!_rwandaPhone.hasMatch(v)) {
-      return 'Enter a valid Rwandan number, e.g. 0781234567';
+      return 'Enter a valid Rwandan number, e.g. 0788 123 456';
     }
     return null;
   }
