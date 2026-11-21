@@ -12,9 +12,14 @@ class NoVehicleView extends StatelessWidget {
     return EmptyState(
       icon: Icons.local_shipping_outlined,
       title: 'Add your vehicle first',
-      message: 'Open jobs for your vehicle type show up once it is registered.',
+      message:
+          'Add it on your profile. Open jobs for your vehicle type show up '
+          'once it is registered.',
       actionLabel: 'Register vehicle',
-      onAction: () => context.push(AppRoutes.driverRegister1),
+      // Not /driver-register-1: the auth redirect sends signed-in users away
+      // from the sign-up steps, and the profile screen is where a signed-in
+      // driver adds a vehicle.
+      onAction: () => context.go(AppRoutes.driverProfile),
     );
   }
 }
