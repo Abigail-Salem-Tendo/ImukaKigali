@@ -6,11 +6,14 @@ import 'package:imuka_kigali/core/router/app_router.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/data/repositories/auth_repository_impl.dart';
 import 'package:imuka_kigali/data/repositories/driver_job_repository_impl.dart';
+import 'package:imuka_kigali/data/repositories/settings_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
+import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/data/repositories/request_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/request_repository.dart';
+import 'package:imuka_kigali/presentation/screens/settings/settings_bloc.dart';
 
 /// Root widget. When a repository or the global blocs exist, wrap [AppView]
 /// here with MultiRepositoryProvider (one line per repository) and
@@ -29,6 +32,9 @@ class App extends StatelessWidget {
         RepositoryProvider<RequestRepository>(
           create: (_) => RequestRepositoryImpl(),
         ),
+        RepositoryProvider<SettingsRepository>(
+          create: (_) => SettingsRepositoryImpl(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -36,6 +42,11 @@ class App extends StatelessWidget {
             create: (c) =>
                 AuthBloc(c.read<AuthRepository>())
                   ..add(const AuthCheckRequested()),
+          ),
+          BlocProvider(
+            create: (c) =>
+                SettingsBloc(c.read<SettingsRepository>())
+                  ..add(const SettingsLoaded()),
           ),
         ],
         child: const AppView(),
@@ -49,6 +60,11 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Redraws the app in the theme the user picked in Settings.
+    final themeMode = context.select(
+      (SettingsBloc bloc) => bloc.state.themeMode,
+    );
+
     // The router only checks its redirect when the user navigates. Logging in
     // or out doesn't navigate, so we ask it to check again ourselves.
     return BlocListener<AuthBloc, AuthState>(
@@ -60,7 +76,7 @@ class AppView extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system, // SettingsBloc will provide this later
+        themeMode: themeMode,
         routerConfig: appRouter,
       ),
     );
