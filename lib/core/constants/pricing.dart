@@ -15,12 +15,12 @@ class VehicleTypes {
 class Pricing {
   Pricing._();
 
-  /// Price per estimated minute. A bigger vehicle has a bigger rate.
-  static const Map<String, double> ratePerMinute = {
-    VehicleTypes.tricycle: 60,
-    VehicleTypes.pickup: 90,
-    VehicleTypes.van: 120,
-    VehicleTypes.truck: 180,
+  /// Price per km of road distance. A bigger vehicle has a bigger rate.
+  static const Map<String, double> ratePerKm = {
+    VehicleTypes.tricycle: 400,
+    VehicleTypes.pickup: 700,
+    VehicleTypes.van: 900,
+    VehicleTypes.truck: 1400,
   };
 
   /// Straight-line distance is multiplied by this to approximate road distance.
