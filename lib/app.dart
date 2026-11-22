@@ -34,8 +34,8 @@ class App extends StatelessWidget {
         providers: [
           BlocProvider(
             create: (c) =>
-            AuthBloc(c.read<AuthRepository>())
-              ..add(const AuthCheckRequested()),
+                AuthBloc(c.read<AuthRepository>())
+                  ..add(const AuthCheckRequested()),
           ),
         ],
         child: const AppView(),
