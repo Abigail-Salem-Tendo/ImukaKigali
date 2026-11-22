@@ -1,108 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
-import 'package:imuka_kigali/domain/entities/move_request.dart';
 import 'package:imuka_kigali/domain/entities/payment.dart';
 import 'package:imuka_kigali/domain/repositories/payment_repository.dart';
-import 'package:imuka_kigali/domain/repositories/request_repository.dart';
 import 'package:imuka_kigali/presentation/screens/delivery_handshake_payment/delivery_bloc.dart';
+
+import '../helpers/fake_request_repository.dart';
 
 const _clientId = 'client1';
 const _driverId = 'driver1';
-
-MoveRequest _request({
-  String status = RequestStatus.accepted,
-  bool clientConfirmed = false,
-  bool driverConfirmed = false,
-}) => MoveRequest(
-  id: 'r1',
-  clientId: _clientId,
-  driverId: _driverId,
-  pickupLocation: 'Kimironko',
-  dropoffLocation: 'Nyamirambo',
-  itemDescription: 'Sofa',
-  vehicleType: 'pickup',
-  estimatedMinutes: 40,
-  proposedAmount: 12500,
-  status: status,
-  clientConfirmed: clientConfirmed,
-  driverConfirmed: driverConfirmed,
-  createdAt: DateTime(2026),
-);
-
-/// In-memory RequestRepository. Updating a request pushes the new version to
-/// the live stream, like Firestore does.
-class FakeRequestRepository implements RequestRepository {
-  FakeRequestRepository(this.current);
-
-  MoveRequest current;
-  String? failUpdateWith;
-  final _listeners = <StreamController<MoveRequest?>>[];
-  final updates = <Map<String, dynamic>>[];
-
-  void emit(MoveRequest? request) {
-    for (final listener in _listeners) {
-      listener.add(request);
-    }
-  }
-
-  // Like Firestore's snapshots(): the current request first, then every change.
-  @override
-  Stream<MoveRequest?> watchRequest(String requestId) {
-    late final StreamController<MoveRequest?> controller;
-    controller = StreamController<MoveRequest?>(
-      onListen: () {
-        _listeners.add(controller);
-        controller.add(current);
-      },
-      onCancel: () => _listeners.remove(controller),
-    );
-    return controller.stream;
-  }
-
-  @override
-  Future<void> updateRequest(
-    String requestId,
-    Map<String, dynamic> fields,
-  ) async {
-    if (failUpdateWith != null) throw Exception(failUpdateWith);
-    updates.add(fields);
-    current = MoveRequest(
-      id: current.id,
-      clientId: current.clientId,
-      driverId: current.driverId,
-      pickupLocation: current.pickupLocation,
-      dropoffLocation: current.dropoffLocation,
-      itemDescription: current.itemDescription,
-      vehicleType: current.vehicleType,
-      estimatedMinutes: current.estimatedMinutes,
-      proposedAmount: current.proposedAmount,
-      status: fields[Fields.status] as String? ?? current.status,
-      clientConfirmed:
-          fields[Fields.clientConfirmed] as bool? ?? current.clientConfirmed,
-      driverConfirmed:
-          fields[Fields.driverConfirmed] as bool? ?? current.driverConfirmed,
-      createdAt: current.createdAt,
-    );
-    emit(current);
-  }
-
-  @override
-  Future<String> createRequest(MoveRequest request) =>
-      throw UnimplementedError();
-
-  @override
-  Stream<List<MoveRequest>> watchMyRequests(String clientId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<MoveRequest?> getRequest(String requestId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<void> cancelRequest(String requestId) => throw UnimplementedError();
-}
 
 /// In-memory PaymentRepository so the bloc can be tested without Firebase.
 class FakePaymentRepository implements PaymentRepository {
@@ -140,7 +45,7 @@ void main() {
   }
 
   setUp(() {
-    requests = FakeRequestRepository(_request());
+    requests = FakeRequestRepository(dealRequest());
     payments = FakePaymentRepository();
   });
   tearDown(() => bloc.close());
@@ -224,7 +129,7 @@ void main() {
       await start();
       expect(bloc.state.otherConfirmed, isFalse);
 
-      requests.emit(_request(driverConfirmed: true));
+      requests.emit(dealRequest(driverConfirmed: true));
       await bloc.stream.firstWhere((s) => s.otherConfirmed);
     });
 
@@ -254,7 +159,7 @@ void main() {
 
     test('a cancelled request cannot be confirmed', () async {
       requests = FakeRequestRepository(
-        _request(status: RequestStatus.cancelled),
+        dealRequest(status: RequestStatus.cancelled),
       );
       bloc = build(_clientId);
       await start();
@@ -270,7 +175,7 @@ void main() {
   group('payment', () {
     Future<void> bothConfirmedAndMethodPicked() async {
       requests = FakeRequestRepository(
-        _request(clientConfirmed: true, driverConfirmed: true),
+        dealRequest(clientConfirmed: true, driverConfirmed: true),
       );
       bloc = build(_clientId);
       await start();
@@ -279,7 +184,7 @@ void main() {
     }
 
     test('cannot pay until both sides have confirmed', () async {
-      requests = FakeRequestRepository(_request(clientConfirmed: true));
+      requests = FakeRequestRepository(dealRequest(clientConfirmed: true));
       bloc = build(_clientId);
       await start();
       bloc.add(const PaymentMethodSelected(PaymentMethods.cash));
@@ -293,7 +198,7 @@ void main() {
 
     test('cannot pay without choosing a method', () async {
       requests = FakeRequestRepository(
-        _request(clientConfirmed: true, driverConfirmed: true),
+        dealRequest(clientConfirmed: true, driverConfirmed: true),
       );
       bloc = build(_clientId);
       await start();
@@ -304,7 +209,7 @@ void main() {
 
     test('a driver can never pay', () async {
       requests = FakeRequestRepository(
-        _request(clientConfirmed: true, driverConfirmed: true),
+        dealRequest(clientConfirmed: true, driverConfirmed: true),
       );
       bloc = build(_driverId);
       await start();
