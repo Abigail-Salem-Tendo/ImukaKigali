@@ -9,7 +9,15 @@ class RecordingAuthRepository implements AuthRepository {
   final List<String> signInEmails = [];
   final List<String> resetEmails = [];
   final List<AppUser> registeredUsers = [];
+  int verificationEmailsSent = 0;
+  int signOutCalls = 0;
   String? failWith;
+
+  /// The user found when the app starts. null = nobody signed in.
+  AppUser? signedIn;
+
+  /// What isEmailVerified() answers.
+  bool verified = false;
 
   @override
   Future<AppUser> signIn({
@@ -56,10 +64,19 @@ class RecordingAuthRepository implements AuthRepository {
   Future<void> sendPasswordReset(String email) async => resetEmails.add(email);
 
   @override
-  Future<AppUser?> getCurrentUser() async => null;
+  Future<void> sendEmailVerification() async => verificationEmailsSent++;
 
   @override
-  Future<void> signOut() async {}
+  Future<bool> isEmailVerified() async => verified;
+
+  @override
+  Future<AppUser?> getCurrentUser() async => signedIn;
+
+  @override
+  Future<void> signOut() async {
+    signOutCalls++;
+    signedIn = null;
+  }
 
   @override
   Future<AppUser?> getUser(String uid) async => null;
