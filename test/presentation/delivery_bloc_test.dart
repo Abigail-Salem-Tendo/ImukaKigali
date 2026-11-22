@@ -1,34 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/domain/entities/payment.dart';
-import 'package:imuka_kigali/domain/repositories/payment_repository.dart';
 import 'package:imuka_kigali/presentation/screens/delivery_handshake_payment/delivery_bloc.dart';
 
+import '../helpers/fake_payment_repository.dart';
 import '../helpers/fake_request_repository.dart';
 
 const _clientId = 'client1';
 const _driverId = 'driver1';
-
-/// In-memory PaymentRepository so the bloc can be tested without Firebase.
-class FakePaymentRepository implements PaymentRepository {
-  Payment? saved;
-  String? failCreateWith;
-  int createCalls = 0;
-
-  @override
-  Future<String> createPayment(Payment payment) async {
-    createCalls++;
-    if (failCreateWith != null) throw Exception(failCreateWith);
-    saved = payment;
-    return payment.requestId;
-  }
-
-  @override
-  Future<Payment?> getPaymentForRequest(String requestId) async => saved;
-
-  @override
-  Future<void> updatePayment(Payment payment) async => saved = payment;
-}
 
 void main() {
   late FakeRequestRepository requests;
