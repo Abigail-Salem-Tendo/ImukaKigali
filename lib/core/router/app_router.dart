@@ -10,6 +10,7 @@ import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_b
 import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_screen.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
+import 'package:imuka_kigali/presentation/screens/delivery_handshake_payment/delivery_handshake_payment_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_screen.dart';
@@ -81,7 +82,12 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(path: AppRoutes.jobLogs, builder: (_, _) => const JobLogsScreen()),
     _placeholder(AppRoutes.driverContact, 'Driver contact'),
-    _placeholder(AppRoutes.delivery, 'Delivery and payment'),
+    GoRoute(
+      path: AppRoutes.delivery,
+      builder: (context, state) => DeliveryHandshakePaymentScreen(
+        requestId: state.pathParameters['requestId']!,
+      ),
+    ),
     _placeholder(AppRoutes.rate, 'Rate driver'),
   ],
 );

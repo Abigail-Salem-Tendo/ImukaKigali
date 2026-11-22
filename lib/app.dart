@@ -13,7 +13,9 @@ import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+import 'package:imuka_kigali/data/repositories/payment_repository_impl.dart';
 import 'package:imuka_kigali/data/repositories/request_repository_impl.dart';
+import 'package:imuka_kigali/domain/repositories/payment_repository.dart';
 import 'package:imuka_kigali/domain/repositories/request_repository.dart';
 import 'package:imuka_kigali/presentation/screens/settings/settings_bloc.dart';
 
@@ -30,6 +32,9 @@ class App extends StatelessWidget {
         RepositoryProvider<AuthRepository>(create: (_) => AuthRepositoryImpl()),
         RepositoryProvider<DriverJobRepository>(
           create: (_) => DriverJobRepositoryImpl(),
+        ),
+        RepositoryProvider<PaymentRepository>(
+          create: (_) => PaymentRepositoryImpl(),
         ),
         RepositoryProvider<RequestRepository>(
           create: (_) => RequestRepositoryImpl(),
