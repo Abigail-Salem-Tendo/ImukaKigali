@@ -8,7 +8,7 @@ import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/domain/entities/move_request.dart';
 // Member 2's formatRwf(int) clashes with mine in job_log_format.dart, so it
 // is hidden until the group agrees on one shared formatRwf.
-import 'package:imuka_kigali/domain/entities/vehicle_class.dart' hide formatRwf;
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_bloc.dart';

@@ -7,7 +7,7 @@ import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/domain/entities/vehicle.dart';
 // Member 2's formatRwf(int) clashes with mine in job_log_format.dart, so it
 // is hidden until the group agrees on one shared formatRwf.
-import 'package:imuka_kigali/domain/entities/vehicle_class.dart' hide formatRwf;
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 
 class VehicleProfileTile extends StatelessWidget {
   const VehicleProfileTile({super.key, required this.vehicle});

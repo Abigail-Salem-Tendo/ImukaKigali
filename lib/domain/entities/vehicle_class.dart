@@ -36,12 +36,12 @@ class VehicleClass {
   /// The path of the vehicle's photo inside the app's assets.
   final String photo;
 
-  /// The price per minute for this vehicle type, read from Pricing.
+  /// The price per km of road for this vehicle type, read from Pricing.
   /// Returns 0 if the type has no price yet.
-  double get ratePerMinute => Pricing.ratePerMinute[type] ?? 0;
+  double get ratePerKm => Pricing.ratePerKm[type] ?? 0;
 
-  /// The price per minute as text, for example "90 RWF / min".
-  String get rateLabel => '${formatRwf(ratePerMinute.round())} / min';
+  /// The price per km as text, for example "700 RWF / km".
+  String get rateLabel => '${_formatRwf(ratePerKm.round())} / km';
 
   /// The capacity as text, for example "350 kg" or "1.5 t".
   String get capacityLabel {
@@ -120,7 +120,7 @@ const Map<String, String> kigaliHubDistricts = {
 };
 
 /// Writes an amount of money the Rwandan way: 24000 becomes "24,000 RWF".
-String formatRwf(int amount) {
+String _formatRwf(int amount) {
   final digits = amount.abs().toString();
   final buffer = StringBuffer();
   for (var i = 0; i < digits.length; i++) {

@@ -15,6 +15,7 @@ import 'package:imuka_kigali/presentation/screens/driver_registration_step2/driv
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
+import 'package:imuka_kigali/presentation/screens/verify_email/verify_email_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
 /// the real screen (change only your own lines to avoid merge conflicts).
@@ -33,6 +34,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.driverPartner,
       builder: (_, _) => const DriverPartnerRegistrationScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.verifyEmail,
+      builder: (_, _) => const VerifyEmailScreen(),
     ),
     GoRoute(
       path: AppRoutes.driverRegister1,
