@@ -11,6 +11,7 @@ import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_sc
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/delivery_handshake_payment/delivery_handshake_payment_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_contact/driver_contact_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_screen.dart';
@@ -82,7 +83,11 @@ final GoRouter appRouter = GoRouter(
       builder: (_, _) => const DriverJobsScreen(),
     ),
     GoRoute(path: AppRoutes.jobLogs, builder: (_, _) => const JobLogsScreen()),
-    _placeholder(AppRoutes.driverContact, 'Driver contact'),
+    GoRoute(
+      path: AppRoutes.driverContact,
+      builder: (context, state) =>
+          DriverContactScreen(requestId: state.pathParameters['requestId']!),
+    ),
     GoRoute(
       path: AppRoutes.delivery,
       builder: (context, state) => DeliveryHandshakePaymentScreen(
