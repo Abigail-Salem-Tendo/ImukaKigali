@@ -7,9 +7,11 @@ import 'package:imuka_kigali/core/theme/app_theme.dart';
 import 'package:imuka_kigali/data/repositories/auth_repository_impl.dart';
 import 'package:imuka_kigali/data/repositories/driver_job_repository_impl.dart';
 import 'package:imuka_kigali/data/repositories/settings_repository_impl.dart';
+import 'package:imuka_kigali/data/repositories/vehicle_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
+import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/data/repositories/request_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/request_repository.dart';
@@ -34,6 +36,9 @@ class App extends StatelessWidget {
         ),
         RepositoryProvider<SettingsRepository>(
           create: (_) => SettingsRepositoryImpl(),
+        ),
+        RepositoryProvider<VehicleRepository>(
+          create: (_) => VehicleRepositoryImpl(),
         ),
       ],
       child: MultiBlocProvider(
