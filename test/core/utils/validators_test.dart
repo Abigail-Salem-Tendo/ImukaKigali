@@ -65,4 +65,20 @@ void main() {
       expect(Validators.phone('+254781234567'), isNotNull);
     });
   });
+
+  group('Validators.fullRwandanPhone', () {
+    test('adds +250 once, however the number was typed', () {
+      for (final typed in [
+        '788 123 456',
+        '0788 123 456',
+        '250788123456',
+        '+250 788 123 456',
+      ]) {
+        expect(Validators.fullRwandanPhone(typed), '+250788123456');
+      }
+    });
+    test('stays empty when nothing was typed', () {
+      expect(Validators.fullRwandanPhone('  '), '');
+    });
+  });
 }
