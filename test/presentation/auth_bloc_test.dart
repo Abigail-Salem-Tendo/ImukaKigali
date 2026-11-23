@@ -69,6 +69,18 @@ class FakeAuthRepository implements AuthRepository {
     resetEmail = email;
   }
 
+  /// What signInWithGoogle() does: return this profile (null = first
+  /// time), or throw SignInCancelled when [googleCancelled] is true.
+  AppUser? googleProfile;
+  bool googleCancelled = false;
+
+  @override
+  Future<AppUser?> signInWithGoogle() async {
+    _maybeFail();
+    if (googleCancelled) throw const SignInCancelled();
+    return signedIn = googleProfile;
+  }
+
   @override
   Future<AppUser> completeProfile({
     required String fullName,
@@ -236,6 +248,41 @@ void main() {
       final done = await bloc.stream.firstWhere((s) => s.message != null);
       expect(repo.verificationEmailsSent, 1);
       expect(done.message, contains('diane@example.com'));
+    });
+  });
+
+  group('Google sign-in', () {
+    test('a first-time Google user must complete their profile', () async {
+      bloc.add(const GoogleSignInRequested());
+      final done = await bloc.stream.firstWhere((s) => !s.isLoading);
+      expect(done.status, AuthStatus.needsProfile);
+      expect(done.user, isNull);
+    });
+
+    test('a returning Google user is signed in', () async {
+      repo
+        ..googleProfile = _client
+        ..verified = true;
+      bloc.add(const GoogleSignInRequested());
+      final done = await bloc.stream.firstWhere(
+        (s) => s.status == AuthStatus.authenticated,
+      );
+      expect(done.user, _client);
+    });
+
+    test('closing the account picker shows no error', () async {
+      repo.googleCancelled = true;
+      bloc.add(const GoogleSignInRequested());
+      final done = await bloc.stream.firstWhere((s) => !s.isLoading);
+      expect(done.error, isNull);
+      expect(done.status, AuthStatus.unknown);
+    });
+
+    test('a failed Google sign-in shows the error', () async {
+      repo.failWith = 'Google sign-in failed. Please try again.';
+      bloc.add(const GoogleSignInRequested());
+      final done = await bloc.stream.firstWhere((s) => s.error != null);
+      expect(done.error, 'Google sign-in failed. Please try again.');
     });
   });
 

@@ -70,6 +70,11 @@ class VerificationEmailResent extends AuthEvent {
   const VerificationEmailResent();
 }
 
+/// The user tapped "Continue with Google".
+class GoogleSignInRequested extends AuthEvent {
+  const GoogleSignInRequested();
+}
+
 /// Someone who signed in with Google for the first time filled in the
 /// details Google doesn't give us. Their email comes from Google.
 class ProfileCompleted extends AuthEvent {

@@ -11,6 +11,7 @@ class RecordingAuthRepository implements AuthRepository {
   final List<AppUser> registeredUsers = [];
   final List<AppUser> completedProfiles = [];
   int verificationEmailsSent = 0;
+  int googleSignIns = 0;
   int signOutCalls = 0;
   String? failWith;
 
@@ -59,6 +60,12 @@ class RecordingAuthRepository implements AuthRepository {
     );
     registeredUsers.add(user);
     return user;
+  }
+
+  @override
+  Future<AppUser?> signInWithGoogle() async {
+    googleSignIns++;
+    return null;
   }
 
   @override

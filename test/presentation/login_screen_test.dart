@@ -89,6 +89,13 @@ void main() {
     expect(repo.resetEmails, isEmpty);
   });
 
+  testWidgets('"Continue with Google" starts a Google sign-in', (tester) async {
+    await showLoginScreen(tester);
+    await tapText(tester, 'Continue with Google');
+
+    expect(repo.googleSignIns, 1);
+  });
+
   testWidgets('forgot password with an email sends the reset link', (
     tester,
   ) async {

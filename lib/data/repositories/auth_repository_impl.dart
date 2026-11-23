@@ -3,6 +3,7 @@
 // (firebase_auth for the login account, the 'users' collection for the profile).
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../core/constants/firestore_constants.dart';
 import '../../domain/entities/app_user.dart';
@@ -15,6 +16,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _db;
+  final GoogleSignIn _google = GoogleSignIn.instance;
+
+  // GoogleSignIn must be set up once before it is used. It is done on the
+  // first tap of the button, not at app start, so email users never pay
+  // for it.
+  bool _googleReady = false;
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _db.collection(Collections.users);
@@ -107,6 +114,37 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AppUser?> signInWithGoogle() async {
+    final GoogleSignInAccount account;
+    try {
+      if (!_googleReady) {
+        // On Android the client id is read from google-services.json.
+        await _google.initialize();
+        _googleReady = true;
+      }
+      account = await _google.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw const SignInCancelled();
+      }
+      throw Exception('Google sign-in failed. Please try again.');
+    }
+
+    // Google proves who the user is; Firebase turns that proof into a
+    // normal Firebase login, with the same uid every time.
+    final credential = GoogleAuthProvider.credential(
+      idToken: account.authentication.idToken,
+    );
+    try {
+      final cred = await _auth.signInWithCredential(credential);
+      // null for a first-time user: they have no 'users' document yet.
+      return await getUser(cred.user!.uid);
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_readable(e));
+    }
+  }
+
+  @override
   Future<AppUser> completeProfile({
     required String fullName,
     required String phone,
@@ -183,7 +221,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    // Also forget the Google account, so the next Google sign-in shows the
+    // account picker instead of reusing the last account.
+    if (_googleReady) {
+      await _google.signOut();
+    }
+    await _auth.signOut();
+  }
 
   @override
   Future<AppUser?> getUser(String uid) async {

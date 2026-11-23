@@ -163,6 +163,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: _logIn,
                           ),
                         ),
+                        const SizedBox(height: AppSpacing.sm),
+                        // No form check: Google gives us the email, and a
+                        // first-time user fills in the rest on the next page.
+                        AppButton.secondary(
+                          label: 'Continue with Google',
+                          icon: Icons.g_mobiledata,
+                          onPressed: () => context.read<AuthBloc>().add(
+                            const GoogleSignInRequested(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
