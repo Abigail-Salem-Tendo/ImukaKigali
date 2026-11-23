@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
@@ -12,6 +14,10 @@ class RecordingAuthRepository implements AuthRepository {
   final List<AppUser> completedProfiles = [];
   int verificationEmailsSent = 0;
   int googleSignIns = 0;
+
+  /// When set, signIn() waits until the test completes it, so a test can
+  /// look at the screen while the login is still running.
+  Completer<void>? signInGate;
   int signOutCalls = 0;
   String? failWith;
 
@@ -27,6 +33,7 @@ class RecordingAuthRepository implements AuthRepository {
     required String password,
   }) async {
     signInEmails.add(email);
+    await signInGate?.future;
     if (failWith != null) throw Exception(failWith);
     return AppUser(
       uid: 'u1',

@@ -166,11 +166,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: AppSpacing.sm),
                         // No form check: Google gives us the email, and a
                         // first-time user fills in the rest on the next page.
-                        AppButton.secondary(
-                          label: 'Continue with Google',
-                          icon: Icons.g_mobiledata,
-                          onPressed: () => context.read<AuthBloc>().add(
-                            const GoogleSignInRequested(),
+                        // Disabled while any sign-in is running, so two
+                        // sign-ins can't start at once.
+                        BlocBuilder<AuthBloc, AuthState>(
+                          buildWhen: (previous, current) =>
+                              previous.isLoading != current.isLoading,
+                          builder: (context, state) => AppButton.secondary(
+                            label: 'Continue with Google',
+                            icon: Icons.g_mobiledata,
+                            onPressed: state.isLoading
+                                ? null
+                                : () => context.read<AuthBloc>().add(
+                                    const GoogleSignInRequested(),
+                                  ),
                           ),
                         ),
                       ],
