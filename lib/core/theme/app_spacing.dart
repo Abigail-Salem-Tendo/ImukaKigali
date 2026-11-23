@@ -15,8 +15,7 @@ class AppSpacing {
   // Corner radius
   static const double radiusInput = 12;
   static const double radiusCard = 16;
-  static const double radiusButton =
-      12; 
+  static const double radiusButton = 12;
   static const double radiusSm = 8; // small things like chips
 
   // Cards
