@@ -12,6 +12,8 @@ import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/client_home/client_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
+import 'package:imuka_kigali/presentation/screens/delivery_handshake_payment/delivery_handshake_payment_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_contact/driver_contact_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
@@ -22,6 +24,7 @@ import 'package:imuka_kigali/presentation/screens/driver_registration_step2/driv
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
+import 'package:imuka_kigali/presentation/screens/rate_driver/rate_driver_screen.dart';
 import 'package:imuka_kigali/presentation/screens/settings/settings_screen.dart';
 import 'package:imuka_kigali/presentation/screens/verify_email/verify_email_screen.dart';
 
@@ -99,9 +102,22 @@ final GoRouter appRouter = GoRouter(
       builder: (_, _) => const DriverJobsScreen(),
     ),
     GoRoute(path: AppRoutes.jobLogs, builder: (_, _) => const JobLogsScreen()),
-    _placeholder(AppRoutes.driverContact, 'Driver contact'),
-    _placeholder(AppRoutes.delivery, 'Delivery and payment'),
-    _placeholder(AppRoutes.rate, 'Rate driver'),
+    GoRoute(
+      path: AppRoutes.driverContact,
+      builder: (context, state) =>
+          DriverContactScreen(requestId: state.pathParameters['requestId']!),
+    ),
+    GoRoute(
+      path: AppRoutes.delivery,
+      builder: (context, state) => DeliveryHandshakePaymentScreen(
+        requestId: state.pathParameters['requestId']!,
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.rate,
+      builder: (context, state) =>
+          RateDriverScreen(requestId: state.pathParameters['requestId']!),
+    ),
   ],
 );
 
@@ -114,25 +130,4 @@ Widget _buildDriverRegister2(BuildContext context, GoRouterState state) {
     return DriverRegistrationStep2Screen(bloc: bloc);
   }
   return const DriverRegistrationStep1Screen();
-}
-
-GoRoute _placeholder(String path, String title) {
-  return GoRoute(
-    path: path,
-    builder: (context, state) => _PlaceholderScreen(title: title),
-  );
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text(title)),
-    );
-  }
 }
