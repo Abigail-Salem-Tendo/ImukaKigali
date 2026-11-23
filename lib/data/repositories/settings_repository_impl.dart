@@ -1,6 +1,7 @@
 // Owner: Member 2
 // SettingsRepositoryImpl implements SettingsRepository using shared_preferences.
 import 'package:flutter/material.dart' show ThemeMode;
+import 'package:imuka_kigali/core/constants/kigali_districts.dart';
 import 'package:imuka_kigali/core/constants/pref_keys.dart';
 import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsRepositoryImpl implements SettingsRepository {
   /// Creates the repository. The app passes nothing. A test can pass its
   /// own [prefs] instead.
-  SettingsRepositoryImpl({SharedPreferences? prefs}) : _prefs = prefs;
+  SettingsRepositoryImpl({this._prefs});
 
   SharedPreferences? _prefs;
 
@@ -35,7 +36,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
     final savedDistrict = prefs.getString(PrefKeys.defaultDistrict);
     final district =
-        savedDistrict != null && kigaliDistricts.contains(savedDistrict)
+        savedDistrict != null && KigaliDistricts.all.contains(savedDistrict)
         ? savedDistrict
         : defaults.defaultDistrict;
 
