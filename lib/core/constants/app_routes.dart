@@ -7,12 +7,15 @@ class AppRoutes {
   static const String login = '/login';
   static const String createAccount = '/create-account';
   static const String driverPartner = '/driver-partner';
+  static const String verifyEmail = '/verify-email';
+  static const String completeProfile = '/complete-profile';
   static const String driverRegister1 = '/driver-register-1';
   static const String driverRegister2 = '/driver-register-2';
   static const String driverProfile = '/driver-profile';
   static const String settings = '/settings';
 
   // Client
+  static const String clientHome = '/client-home';
   static const String whereFromTo = '/where-from-to';
   static const String itemDetails = '/item-details';
   static const String findingDriver = '/finding-driver/:requestId';

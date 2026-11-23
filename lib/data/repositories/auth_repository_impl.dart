@@ -3,6 +3,7 @@
 // (firebase_auth for the login account, the 'users' collection for the profile).
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../core/constants/firestore_constants.dart';
 import '../../domain/entities/app_user.dart';
@@ -15,6 +16,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _db;
+  final GoogleSignIn _google = GoogleSignIn.instance;
+
+  // GoogleSignIn must be set up once before it is used. It is done on the
+  // first tap of the button, not at app start, so email users never pay
+  // for it.
+  bool _googleReady = false;
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _db.collection(Collections.users);
@@ -25,7 +32,14 @@ class AuthRepositoryImpl implements AuthRepository {
     // is found even if Firebase has not finished loading it yet.
     final firebaseUser = await _auth.authStateChanges().first;
     if (firebaseUser == null) return null;
-    return getUser(firebaseUser.uid);
+    final user = await getUser(firebaseUser.uid);
+    // Someone who closed the app on "Complete your profile" is still signed
+    // in to Firebase. Sign them out, so the app and Firebase agree that
+    // nobody is signed in; Google sign-in brings them back to that page.
+    if (user == null) {
+      await _auth.signOut();
+    }
+    return user;
   }
 
   @override
@@ -81,17 +95,120 @@ class AuthRepositoryImpl implements AuthRepository {
     );
 
     try {
-      await _users.doc(user.uid).set({
-        ...user.toMap(),
-        Fields.createdAt: FieldValue.serverTimestamp(),
-      });
-    } on FirebaseException catch (e) {
+      await _saveProfile(user);
+    } catch (_) {
       // Don't leave a login with no profile behind: remove it so the person
       // can simply try again with the same email.
       await cred.user?.delete();
-      throw Exception(e.message ?? 'Could not save your profile. Try again.');
+      rethrow;
+    }
+
+    // The account is ready even if this email fails to send, so a failure
+    // here is ignored: the "Check your inbox" screen has a Resend button.
+    try {
+      await cred.user!.sendEmailVerification();
+    } on FirebaseAuthException {
+      // Ignored on purpose (see above).
     }
     return user;
+  }
+
+  @override
+  Future<AppUser?> signInWithGoogle() async {
+    final GoogleSignInAccount account;
+    try {
+      if (!_googleReady) {
+        // On Android the client id is read from google-services.json.
+        await _google.initialize();
+        _googleReady = true;
+      }
+      account = await _google.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw const SignInCancelled();
+      }
+      throw Exception('Google sign-in failed. Please try again.');
+    }
+
+    // Google proves who the user is; Firebase turns that proof into a
+    // normal Firebase login, with the same uid every time.
+    final credential = GoogleAuthProvider.credential(
+      idToken: account.authentication.idToken,
+    );
+    try {
+      final cred = await _auth.signInWithCredential(credential);
+      // null for a first-time user: they have no 'users' document yet.
+      return await getUser(cred.user!.uid);
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_readable(e));
+    }
+  }
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) async {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) {
+      throw Exception('Please sign in again.');
+    }
+    final user = AppUser(
+      uid: firebaseUser.uid,
+      role: role,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      email: firebaseUser.email ?? '',
+      district: district,
+      createdAt: DateTime.now(),
+    );
+    await _saveProfile(user);
+    return user;
+  }
+
+  /// Writes a new user's 'users' document. Used by both ways of signing up.
+  Future<void> _saveProfile(AppUser user) async {
+    try {
+      await _users.doc(user.uid).set({
+        ...user.toMap(),
+        // The server's clock, so a wrong phone clock can't change it.
+        Fields.createdAt: FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw Exception(e.message ?? 'Could not save your profile. Try again.');
+    }
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    try {
+      await _auth.currentUser?.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_readable(e));
+    }
+  }
+
+  @override
+  Future<bool> isEmailVerified() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return false;
+    }
+    try {
+      // Firebase remembers the user as they were at login. reload() fetches
+      // them again, so a link clicked a moment ago is seen.
+      await user.reload();
+    } on FirebaseAuthException {
+      // reload() needs internet. Every sign-in asks this question, so
+      // failing here would log people out (or break a sign-up that worked)
+      // just because they are offline. The last known answer is used instead.
+      return user.emailVerified;
+    }
+    // Read currentUser again: reload() refreshes Firebase's copy, not the
+    // old `user` object we are holding.
+    return _auth.currentUser?.emailVerified ?? false;
   }
 
   @override
@@ -104,7 +221,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    // Also forget the Google account, so the next Google sign-in shows the
+    // account picker instead of reusing the last account.
+    if (_googleReady) {
+      await _google.signOut();
+    }
+    await _auth.signOut();
+  }
 
   @override
   Future<AppUser?> getUser(String uid) async {

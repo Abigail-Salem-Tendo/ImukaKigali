@@ -2,8 +2,9 @@
 // Screen: Settings (theme, notifications, default district) (StatelessWidget, template: ARCHITECTURE.md Part 5)
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:imuka_kigali/core/constants/kigali_districts.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
-import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
+import 'package:imuka_kigali/core/widgets/app_snack_bar.dart';
 import 'package:imuka_kigali/presentation/screens/settings/settings_bloc.dart';
 
 /// The settings screen: theme, notifications and default district.
@@ -12,13 +13,6 @@ class SettingsScreen extends StatelessWidget {
   /// Creates the screen. It reads everything from the global SettingsBloc.
   const SettingsScreen({super.key});
 
-  /// Shows [message] in a snackbar at the bottom of the screen.
-  void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
-  }
-
   /// Draws the three groups of settings in a scrolling list, so nothing
   /// overflows in landscape. A failure in the bloc shows a snackbar.
   @override
@@ -26,8 +20,11 @@ class SettingsScreen extends StatelessWidget {
     return BlocListener<SettingsBloc, SettingsState>(
       listenWhen: (previous, current) =>
           current.status == SettingsStatus.failure,
-      listener: (context, state) =>
-          _showError(context, state.error ?? 'Something went wrong.'),
+      listener: (context, state) => showAppSnackBar(
+        context,
+        state.error ?? 'Something went wrong.',
+        type: SnackBarType.error,
+      ),
       child: Scaffold(
         appBar: AppBar(title: const Text('Settings')),
         body: SafeArea(
@@ -78,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
                       value: state.defaultDistrict,
                       underline: const SizedBox.shrink(),
                       items: [
-                        for (final district in kigaliDistricts)
+                        for (final district in KigaliDistricts.all)
                           DropdownMenuItem(
                             value: district,
                             child: Text(district),

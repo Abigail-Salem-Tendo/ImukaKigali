@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
+import 'package:imuka_kigali/core/constants/kigali_districts.dart';
 import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/kigali_sectors.dart';
 
 part 'driver_registration_event.dart';
 part 'driver_registration_state.dart';

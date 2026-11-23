@@ -70,6 +70,10 @@ class _Step2View extends StatelessWidget {
               final plateError = state.showStep2Errors
                   ? state.plateNumberError
                   : null;
+              final chosenType = state.vehicleType;
+              final plateExample = chosenType == null
+                  ? 'RAD 428 E'
+                  : VehicleClasses.of(chosenType).plateExample;
 
               return ListView(
                 padding: AppSpacing.screenPadding,
@@ -144,7 +148,7 @@ class _Step2View extends StatelessWidget {
                         textInputAction: TextInputAction.done,
                         autocorrect: false,
                         decoration: InputDecoration(
-                          hintText: 'e.g. RAD 428 E',
+                          hintText: 'e.g. $plateExample',
                           prefixIcon: const Icon(
                             Icons.confirmation_number_outlined,
                           ),

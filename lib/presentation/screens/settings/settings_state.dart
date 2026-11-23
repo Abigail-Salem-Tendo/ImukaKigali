@@ -12,7 +12,7 @@ class SettingsState extends Equatable {
     this.status = SettingsStatus.initial,
     this.themeMode = ThemeMode.system,
     this.notificationsEnabled = true,
-    this.defaultDistrict = 'Gasabo',
+    this.defaultDistrict = KigaliDistricts.gasabo,
     this.error,
   });
 

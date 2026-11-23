@@ -3,6 +3,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:imuka_kigali/core/constants/kigali_districts.dart';
 import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
 
 part 'settings_event.dart';

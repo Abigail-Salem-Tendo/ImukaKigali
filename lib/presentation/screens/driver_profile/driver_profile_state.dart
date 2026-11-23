@@ -14,6 +14,7 @@ class DriverProfileState extends Equatable {
     this.isSaving = false,
     this.message,
     this.error,
+    this.userUpdated = false,
   });
 
   final DriverProfileStatus status;
@@ -33,10 +34,15 @@ class DriverProfileState extends Equatable {
   /// A readable error message for a snackbar.
   final String? error;
 
+  /// True just after the driver's own details were saved, so the screen
+  /// can reload the signed-in user and show the change.
+  final bool userUpdated;
+
   /// Returns a copy of this state with only the given values replaced.
   /// Pass [clearVehicle] as true to set the vehicle back to null, because
   /// passing null for [vehicle] means "keep the current one".
-  /// [message] and [error] are cleared unless new ones are passed.
+  /// [message], [error] and [userUpdated] are cleared unless new ones are
+  /// passed.
   DriverProfileState copyWith({
     DriverProfileStatus? status,
     bool? hasLoaded,
@@ -45,6 +51,7 @@ class DriverProfileState extends Equatable {
     bool? isSaving,
     String? message,
     String? error,
+    bool userUpdated = false,
   }) {
     return DriverProfileState(
       status: status ?? this.status,
@@ -53,6 +60,7 @@ class DriverProfileState extends Equatable {
       isSaving: isSaving ?? this.isSaving,
       message: message,
       error: error,
+      userUpdated: userUpdated,
     );
   }
 
@@ -65,5 +73,6 @@ class DriverProfileState extends Equatable {
     isSaving,
     message,
     error,
+    userUpdated,
   ];
 }

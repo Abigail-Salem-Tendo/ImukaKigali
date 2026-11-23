@@ -13,13 +13,13 @@ import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/domain/repositories/settings_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/settings/settings_bloc.dart';
 import 'package:imuka_kigali/data/repositories/payment_repository_impl.dart';
 import 'package:imuka_kigali/data/repositories/rating_repository_impl.dart';
 import 'package:imuka_kigali/data/repositories/request_repository_impl.dart';
 import 'package:imuka_kigali/domain/repositories/payment_repository.dart';
 import 'package:imuka_kigali/domain/repositories/rating_repository.dart';
 import 'package:imuka_kigali/domain/repositories/request_repository.dart';
-import 'package:imuka_kigali/presentation/screens/settings/settings_bloc.dart';
 
 /// Root widget. When a repository or the global blocs exist, wrap [AppView]
 /// here with MultiRepositoryProvider (one line per repository) and
@@ -35,6 +35,9 @@ class App extends StatelessWidget {
         RepositoryProvider<DriverJobRepository>(
           create: (_) => DriverJobRepositoryImpl(),
         ),
+        RepositoryProvider<VehicleRepository>(
+          create: (_) => VehicleRepositoryImpl(),
+        ),
         RepositoryProvider<PaymentRepository>(
           create: (_) => PaymentRepositoryImpl(),
         ),
@@ -46,9 +49,6 @@ class App extends StatelessWidget {
         ),
         RepositoryProvider<SettingsRepository>(
           create: (_) => SettingsRepositoryImpl(),
-        ),
-        RepositoryProvider<VehicleRepository>(
-          create: (_) => VehicleRepositoryImpl(),
         ),
       ],
       child: MultiBlocProvider(
@@ -84,7 +84,9 @@ class AppView extends StatelessWidget {
     // or out doesn't navigate, so we ask it to check again ourselves.
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
-          previous.status != current.status || previous.user != current.user,
+          previous.status != current.status ||
+          previous.user != current.user ||
+          previous.emailVerified != current.emailVerified,
       listener: (context, state) => appRouter.refresh(),
       child: MaterialApp.router(
         title: 'Imuka Kigali',

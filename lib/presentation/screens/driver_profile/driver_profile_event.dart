@@ -68,3 +68,17 @@ class DriverVehicleDeleted extends DriverProfileEvent {
   /// Creates the event. It carries no data.
   const DriverVehicleDeleted();
 }
+
+/// Sent when the driver saves a new name in the name dialog. [user] is the
+/// signed-in driver as they are now, and [fullName] is the new name.
+class DriverNameChanged extends DriverProfileEvent {
+  /// Creates the event with the current driver and the new name.
+  const DriverNameChanged({required this.user, required this.fullName});
+
+  final AppUser user;
+  final String fullName;
+
+  /// Two of these events are equal when the driver and the name match.
+  @override
+  List<Object?> get props => [user, fullName];
+}

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,6 +89,36 @@ void main() {
 
     expect(find.textContaining('Type your email above first'), findsOneWidget);
     expect(repo.resetEmails, isEmpty);
+  });
+
+  testWidgets('"Continue with Google" starts a Google sign-in', (tester) async {
+    await showLoginScreen(tester);
+    await tapText(tester, 'Continue with Google');
+
+    expect(repo.googleSignIns, 1);
+  });
+
+  testWidgets('"Continue with Google" is disabled while logging in', (
+    tester,
+  ) async {
+    repo.signInGate = Completer<void>();
+    await showLoginScreen(tester);
+    await tester.enterText(emailField(), 'diane@example.com');
+    await tester.enterText(passwordField(), 'kigali2026');
+    await tester.ensureVisible(find.text('Log In to Imuka Kigali'));
+    await tester.tap(find.text('Log In to Imuka Kigali'));
+    // The gate keeps the login running while we look at the button.
+    await tester.pump();
+
+    final google = tester.widget<OutlinedButton>(
+      find.ancestor(
+        of: find.text('Continue with Google'),
+        matching: find.byType(OutlinedButton),
+      ),
+    );
+    expect(google.onPressed, isNull);
+    repo.signInGate!.complete();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('forgot password with an email sends the reset link', (

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
@@ -9,7 +11,21 @@ class RecordingAuthRepository implements AuthRepository {
   final List<String> signInEmails = [];
   final List<String> resetEmails = [];
   final List<AppUser> registeredUsers = [];
+  final List<AppUser> completedProfiles = [];
+  int verificationEmailsSent = 0;
+  int googleSignIns = 0;
+
+  /// When set, signIn() waits until the test completes it, so a test can
+  /// look at the screen while the login is still running.
+  Completer<void>? signInGate;
+  int signOutCalls = 0;
   String? failWith;
+
+  /// The user found when the app starts. null = nobody signed in.
+  AppUser? signedIn;
+
+  /// What isEmailVerified() answers.
+  bool verified = false;
 
   @override
   Future<AppUser> signIn({
@@ -17,6 +33,7 @@ class RecordingAuthRepository implements AuthRepository {
     required String password,
   }) async {
     signInEmails.add(email);
+    await signInGate?.future;
     if (failWith != null) throw Exception(failWith);
     return AppUser(
       uid: 'u1',
@@ -53,13 +70,49 @@ class RecordingAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUser?> signInWithGoogle() async {
+    googleSignIns++;
+    return null;
+  }
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) async {
+    if (failWith != null) throw Exception(failWith);
+    final user = AppUser(
+      uid: 'google-user',
+      role: role,
+      fullName: fullName,
+      phone: phone,
+      email: 'diane@gmail.com',
+      district: district,
+      createdAt: DateTime(2026),
+    );
+    completedProfiles.add(user);
+    return user;
+  }
+
+  @override
   Future<void> sendPasswordReset(String email) async => resetEmails.add(email);
 
   @override
-  Future<AppUser?> getCurrentUser() async => null;
+  Future<void> sendEmailVerification() async => verificationEmailsSent++;
 
   @override
-  Future<void> signOut() async {}
+  Future<bool> isEmailVerified() async => verified;
+
+  @override
+  Future<AppUser?> getCurrentUser() async => signedIn;
+
+  @override
+  Future<void> signOut() async {
+    signOutCalls++;
+    signedIn = null;
+  }
 
   @override
   Future<AppUser?> getUser(String uid) async => null;

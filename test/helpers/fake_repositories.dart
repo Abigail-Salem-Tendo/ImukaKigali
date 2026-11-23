@@ -117,6 +117,23 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> sendPasswordReset(String email) => throw UnimplementedError();
 
   @override
+  Future<AppUser?> signInWithGoogle() => throw UnimplementedError();
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> sendEmailVerification() => throw UnimplementedError();
+
+  @override
+  Future<bool> isEmailVerified() async => true;
+
+  @override
   Future<void> signOut() => throw UnimplementedError();
 
   @override

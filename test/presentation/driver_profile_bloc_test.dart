@@ -1,11 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/core/constants/pricing.dart';
+import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/domain/entities/vehicle.dart';
 import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_bloc.dart';
 
+import '../helpers/fake_repositories.dart';
 import '../helpers/fake_vehicle_repository.dart';
 
 /// The vehicle most tests start with.
@@ -17,15 +20,31 @@ const pickup = Vehicle(
   capacityKg: 1500,
 );
 
+/// An AuthRepository whose updateUser works. It writes down every user it
+/// was given and throws an Exception when [updateError] is set.
+class SavingAuthRepository extends FakeAuthRepository {
+  final List<AppUser> updatedUsers = [];
+  String? updateError;
+
+  /// Writes down the changed user, or throws [updateError].
+  @override
+  Future<void> updateUser(AppUser user) async {
+    updatedUsers.add(user);
+    if (updateError != null) throw Exception(updateError);
+  }
+}
+
 /// Unit tests for the bloc behind the driver profile. Run them with:
 /// flutter test test/presentation/driver_profile_bloc_test.dart
 void main() {
   late FakeVehicleRepository vehicles;
+  late SavingAuthRepository auth;
   late DriverProfileBloc bloc;
 
   setUp(() {
     vehicles = FakeVehicleRepository();
-    bloc = DriverProfileBloc(vehicles);
+    auth = SavingAuthRepository();
+    bloc = DriverProfileBloc(vehicles, auth);
   });
 
   tearDown(() => bloc.close());
@@ -107,6 +126,18 @@ void main() {
       expect(vehicles.updatedVehicles, isEmpty);
       expect(bloc.state.vehicle, pickup);
     });
+
+    test('switching a car plate to a tricycle is refused', () async {
+      await openProfile(pickup);
+
+      bloc.add(const DriverVehicleTypeChanged(VehicleTypes.tricycle));
+      await settle();
+
+      expect(bloc.state.status, DriverProfileStatus.failure);
+      expect(bloc.state.error, contains('RD 204 E'));
+      expect(bloc.state.vehicle, pickup);
+      expect(vehicles.updatedVehicles, isEmpty);
+    });
   });
 
   group('plate number', () {
@@ -131,6 +162,27 @@ void main() {
       expect(bloc.state.error, 'Enter a Rwanda plate like RAD 428 E.');
       expect(bloc.state.vehicle, pickup);
       expect(vehicles.updatedVehicles, isEmpty);
+    });
+
+    test('a tricycle only accepts a moto plate', () async {
+      await openProfile(
+        const Vehicle(
+          id: 'v2',
+          driverId: FakeVehicleRepository.ownerId,
+          vehicleType: VehicleTypes.tricycle,
+          plateNumber: 'RD 204 E',
+          capacityKg: 350,
+        ),
+      );
+
+      bloc.add(const DriverPlateNumberChanged('RAB 123 C'));
+      await settle();
+      expect(bloc.state.error, 'Enter a Rwanda plate like RD 204 E.');
+      expect(vehicles.updatedVehicles, isEmpty);
+
+      bloc.add(const DriverPlateNumberChanged('rf 517 b'));
+      await settle();
+      expect(vehicles.updatedVehicles.single.plateNumber, 'RF 517 B');
     });
 
     test('the same plate typed again saves nothing', () async {
@@ -251,6 +303,58 @@ void main() {
       expect(bloc.state.vehicle, pickup);
       expect(bloc.state.status, DriverProfileStatus.failure);
       expect(bloc.state.error, 'No internet connection.');
+    });
+  });
+
+  group('name', () {
+    final driver = testUser(
+      FakeVehicleRepository.ownerId,
+      'Jean Mugisha',
+      role: UserRoles.driver,
+    );
+
+    test('a new name is saved without extra spaces', () async {
+      bloc.add(
+        DriverNameChanged(user: driver, fullName: '  Jean-Claude Mugisha '),
+      );
+      await settle();
+
+      final saved = auth.updatedUsers.single;
+      expect(saved.fullName, 'Jean-Claude Mugisha');
+      expect(saved.uid, driver.uid);
+      expect(saved.phone, driver.phone);
+      expect(saved.email, driver.email);
+      expect(saved.role, UserRoles.driver);
+      expect(bloc.state.message, 'Name updated.');
+      expect(bloc.state.userUpdated, isTrue);
+    });
+
+    test('a name that is too short shows an error and saves nothing', () async {
+      bloc.add(DriverNameChanged(user: driver, fullName: ' J '));
+      await settle();
+
+      expect(bloc.state.status, DriverProfileStatus.failure);
+      expect(bloc.state.error, 'Enter your full name.');
+      expect(auth.updatedUsers, isEmpty);
+    });
+
+    test('the same name saves nothing', () async {
+      bloc.add(DriverNameChanged(user: driver, fullName: 'Jean Mugisha'));
+      await settle();
+
+      expect(auth.updatedUsers, isEmpty);
+    });
+
+    test('a failed save shows the error', () async {
+      auth.updateError = 'No internet connection.';
+      bloc.add(
+        DriverNameChanged(user: driver, fullName: 'Jean-Claude Mugisha'),
+      );
+      await settle();
+
+      expect(bloc.state.status, DriverProfileStatus.failure);
+      expect(bloc.state.error, 'No internet connection.');
+      expect(bloc.state.userUpdated, isFalse);
     });
   });
 }

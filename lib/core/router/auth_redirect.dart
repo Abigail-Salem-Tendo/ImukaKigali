@@ -28,7 +28,8 @@ const _driverPages = [
 bool _isClientPage(String location) {
   // Finding-driver paths end with a request id (/finding-driver/abc123),
   // so they are matched by their start, not compared whole.
-  return location == AppRoutes.whereFromTo ||
+  return location == AppRoutes.clientHome ||
+      location == AppRoutes.whereFromTo ||
       location == AppRoutes.itemDetails ||
       location.startsWith(AppRoutes.findingDriverPath(''));
 }
@@ -48,8 +49,30 @@ String? authRedirect(AuthState auth, String location) {
     return AppRoutes.login;
   }
 
+  // Signed in with Google but no profile yet: every page needs the role
+  // and the rest of the profile, so this is the only page they can open.
+  if (auth.status == AuthStatus.needsProfile) {
+    if (location == AppRoutes.completeProfile) {
+      return null;
+    }
+    return AppRoutes.completeProfile;
+  }
+
   // From here on the user is signed in.
-  if (_signedOutPages.contains(location)) {
+
+  // Blocked until they click the link in the verification email.
+  if (!auth.emailVerified) {
+    if (location == AppRoutes.verifyEmail) {
+      return null;
+    }
+    return AppRoutes.verifyEmail;
+  }
+
+  // Verified. The inbox and profile pages have done their job, so they
+  // count as pages they no longer need, like login.
+  if (_signedOutPages.contains(location) ||
+      location == AppRoutes.verifyEmail ||
+      location == AppRoutes.completeProfile) {
     return homeFor(auth);
   }
   // Each role stays on its own side of the app.
@@ -67,5 +90,5 @@ String homeFor(AuthState auth) {
   if (auth.isDriver) {
     return AppRoutes.driverHome;
   }
-  return AppRoutes.whereFromTo;
+  return AppRoutes.clientHome;
 }

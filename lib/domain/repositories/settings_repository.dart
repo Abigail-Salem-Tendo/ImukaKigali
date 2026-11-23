@@ -1,9 +1,7 @@
 // Owner: Member 2
 // abstract class SettingsRepository: loadSettings, saveThemeMode, saveNotifications, saveDefaultDistrict.
 import 'package:flutter/material.dart' show ThemeMode;
-
-/// The three districts of Kigali a user can pick as their default area.
-const List<String> kigaliDistricts = ['Gasabo', 'Kicukiro', 'Nyarugenge'];
+import 'package:imuka_kigali/core/constants/kigali_districts.dart';
 
 /// All of the user's saved preferences in one object. They are kept on
 /// the phone with SharedPreferences, not in Firestore.
@@ -13,7 +11,7 @@ class AppSettings {
   const AppSettings({
     this.themeMode = ThemeMode.system,
     this.notificationsEnabled = true,
-    this.defaultDistrict = 'Gasabo',
+    this.defaultDistrict = KigaliDistricts.gasabo,
   });
 
   /// Light, dark, or follow the phone's own setting.
@@ -22,7 +20,7 @@ class AppSettings {
   /// Whether the user wants alerts about their moves.
   final bool notificationsEnabled;
 
-  /// The user's usual area in Kigali. Always one of [kigaliDistricts].
+  /// The user's usual area in Kigali. Always one of [KigaliDistricts.all].
   final String defaultDistrict;
 }
 

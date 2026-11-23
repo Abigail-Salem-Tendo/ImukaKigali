@@ -59,3 +59,39 @@ class PasswordResetRequested extends AuthEvent {
 class LogoutRequested extends AuthEvent {
   const LogoutRequested();
 }
+
+/// The user tapped "I've verified" after clicking the link in the email.
+class EmailVerificationCheckRequested extends AuthEvent {
+  const EmailVerificationCheckRequested();
+}
+
+/// The user tapped "Resend email".
+class VerificationEmailResent extends AuthEvent {
+  const VerificationEmailResent();
+}
+
+/// The user tapped "Continue with Google".
+class GoogleSignInRequested extends AuthEvent {
+  const GoogleSignInRequested();
+}
+
+/// Someone who signed in with Google for the first time filled in the
+/// details Google doesn't give us. Their email comes from Google.
+class ProfileCompleted extends AuthEvent {
+  const ProfileCompleted({
+    required this.fullName,
+    required this.phone,
+    required this.role,
+    required this.district,
+  });
+
+  final String fullName;
+  final String phone;
+
+  /// UserRoles.client or UserRoles.driver.
+  final String role;
+  final String district;
+
+  @override
+  List<Object?> get props => [fullName, phone, role, district];
+}
