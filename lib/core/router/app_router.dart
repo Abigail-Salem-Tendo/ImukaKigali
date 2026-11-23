@@ -1,8 +1,13 @@
-/// setup routes  one route per screen; clients and drivers land on different home screens
+// setup routes  one route per screen; clients and drivers land on different home screens
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
+import 'package:imuka_kigali/domain/repositories/request_repository.dart';
+import 'package:imuka_kigali/presentation/screens/finding_driver/finding_driver_screen.dart';
+import 'package:imuka_kigali/presentation/screens/item_details/item_details_screen.dart';
+import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_screen.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
@@ -42,9 +47,28 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.settings,
       builder: (_, _) => const SettingsScreen(),
     ),
-    _placeholder(AppRoutes.whereFromTo, 'Where from, where to'),
-    _placeholder(AppRoutes.itemDetails, 'Item details'),
-    _placeholder(AppRoutes.findingDriver, 'Finding your driver'),
+    ShellRoute(
+      builder: (context, state, child) => BlocProvider(
+        create: (context) =>
+            CreateRequestBloc(context.read<RequestRepository>()),
+        child: child,
+      ),
+      routes: [
+        GoRoute(
+          path: AppRoutes.whereFromTo,
+          builder: (context, state) => const WhereFromToScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.itemDetails,
+          builder: (context, state) => const ItemDetailsScreen(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: AppRoutes.findingDriver,
+      builder: (context, state) =>
+          FindingDriverScreen(requestId: state.pathParameters['requestId']!),
+    ),
     _placeholder(AppRoutes.driverHome, 'Driver home'),
     GoRoute(
       path: AppRoutes.driverJobs,

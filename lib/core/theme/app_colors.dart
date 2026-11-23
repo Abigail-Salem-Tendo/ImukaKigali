@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Every colour in the app lives here 
+/// Every colour in the app lives here
 /// Screens use Theme.of(context).colorScheme for normal UI.
 /// Only [success] is read straight from here.
 class AppColors {
@@ -10,7 +10,9 @@ class AppColors {
   static const Color lightPrimary = Color(0xFF00A1DE);
   static const Color lightOnPrimary = Color(0xFFFFFFFF);
   static const Color lightSecondary = Color(0xFFFAD201);
-  static const Color lightOnSecondary = Color(0xFF1C1C1E); // dark text on yellow
+  static const Color lightOnSecondary = Color(
+    0xFF1C1C1E,
+  ); // dark text on yellow
   static const Color lightBackground = Color(0xFFF7F8FA);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightText = Color(0xFF1C1C1E);
