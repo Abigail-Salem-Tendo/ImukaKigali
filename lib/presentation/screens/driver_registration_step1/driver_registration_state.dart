@@ -155,10 +155,10 @@ class DriverRegistrationState extends Equatable {
     return null;
   }
 
-  /// Checks that the driver picked at least 2 hubs.
+  /// Checks that the driver picked at least 2 sectors.
   String? get hubsError {
     if (operatingHubs.length < 2) {
-      return 'Pick at least 2 hubs.';
+      return 'Pick at least 2 sectors.';
     }
     return null;
   }
@@ -171,15 +171,24 @@ class DriverRegistrationState extends Equatable {
     return null;
   }
 
-  /// Checks that the plate number was typed and has a Rwanda plate's shape.
+  /// Checks that the plate number was typed and has the shape of a plate
+  /// for the chosen vehicle: "RD 204 E" for a tricycle, "RAD 428 E" for the
+  /// others. Before a vehicle is chosen, either shape is accepted.
   String? get plateNumberError {
     if (plateNumber.trim().isEmpty) {
       return 'Enter your licence plate number.';
     }
-    if (!isValidRwandaPlate(plateNumber)) {
-      return 'Enter a Rwanda plate like RAD 428 E.';
+    final type = vehicleType;
+    if (type == null) {
+      return isValidRwandaPlate(plateNumber)
+          ? null
+          : 'Enter a Rwanda plate like RAD 428 E.';
     }
-    return null;
+    final vehicleClass = VehicleClasses.of(type);
+    if (vehicleClass.acceptsPlate(plateNumber)) {
+      return null;
+    }
+    return vehicleClass.plateError;
   }
 
   /// True when every answer on step 1 passes its check.
@@ -194,13 +203,14 @@ class DriverRegistrationState extends Equatable {
   /// True when every answer on step 2 passes its check.
   bool get isStep2Valid => vehicleTypeError == null && plateNumberError == null;
 
-  /// Returns the district of the first hub the driver picked, for example
-  /// "Gasabo". This is saved as the driver's district.
+  /// Returns the district of the first sector the driver picked, for
+  /// example "Gasabo" for Kimihurura. This is saved as the driver's
+  /// district.
   String get baseDistrict {
     if (operatingHubs.isEmpty) {
-      return 'Gasabo';
+      return KigaliDistricts.gasabo;
     }
-    return kigaliHubDistricts[operatingHubs.first] ?? 'Gasabo';
+    return districtOfSector(operatingHubs.first) ?? KigaliDistricts.gasabo;
   }
 
   /// The values Equatable compares to decide if the screen must redraw.
