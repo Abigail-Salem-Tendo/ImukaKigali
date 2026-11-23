@@ -51,12 +51,23 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
 
   /// Changes the vehicle's type and sets its capacity to match the new
   /// type. Nothing happens if there is no vehicle or the type is the same.
+  /// A type that needs another kind of plate (a tricycle and a car, for
+  /// example) is refused, because that is a different vehicle.
   Future<void> _onVehicleTypeChanged(
     DriverVehicleTypeChanged event,
     Emitter<DriverProfileState> emit,
   ) async {
     final current = state.vehicle;
     if (current == null || current.vehicleType == event.vehicleType) {
+      return;
+    }
+    final newClass = VehicleClasses.of(event.vehicleType);
+    if (!newClass.acceptsPlate(current.plateNumber)) {
+      _fail(
+        emit,
+        'A ${newClass.shortLabel.toLowerCase()} has a plate like '
+        '${newClass.plateExample}. Remove this vehicle and add the new one.',
+      );
       return;
     }
     await _saveChange(
@@ -70,8 +81,9 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     );
   }
 
-  /// Changes the vehicle's plate number after checking that it has a
-  /// Rwanda plate's shape. A wrong plate shows an error and saves nothing.
+  /// Changes the vehicle's plate number after checking that it is the
+  /// right kind of plate for the vehicle. A wrong plate shows an error and
+  /// saves nothing.
   Future<void> _onPlateNumberChanged(
     DriverPlateNumberChanged event,
     Emitter<DriverProfileState> emit,
@@ -80,8 +92,9 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     if (current == null) {
       return;
     }
-    if (!isValidRwandaPlate(event.plateNumber)) {
-      _fail(emit, 'Enter a Rwanda plate like RAD 428 E.');
+    final vehicleClass = VehicleClasses.of(current.vehicleType);
+    if (!vehicleClass.acceptsPlate(event.plateNumber)) {
+      _fail(emit, vehicleClass.plateError);
       return;
     }
     final plate = formatRwandaPlate(event.plateNumber);
@@ -124,13 +137,19 @@ class DriverProfileBloc extends Bloc<DriverProfileEvent, DriverProfileState> {
     }
   }
 
-  /// Creates a vehicle for a driver who has none. isSaving is true while
-  /// the save runs, so the button can show a spinner.
+  /// Creates a vehicle for a driver who has none, after checking that the
+  /// plate is the right kind for the vehicle. isSaving is true while the
+  /// save runs, so the button can show a spinner.
   Future<void> _onVehicleAdded(
     DriverVehicleAdded event,
     Emitter<DriverProfileState> emit,
   ) async {
     if (state.vehicle != null || state.isSaving) {
+      return;
+    }
+    final vehicleClass = VehicleClasses.of(event.vehicleType);
+    if (!vehicleClass.acceptsPlate(event.plateNumber)) {
+      _fail(emit, vehicleClass.plateError);
       return;
     }
     emit(state.copyWith(isSaving: true));
