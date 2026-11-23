@@ -6,6 +6,10 @@ enum AuthStatus {
   unknown,
   authenticated,
   unauthenticated,
+
+  /// Signed in with Google for the first time: Firebase knows them, but
+  /// they have no profile in 'users' yet, so [AuthState.user] is null.
+  needsProfile,
 }
 
 class AuthState extends Equatable {

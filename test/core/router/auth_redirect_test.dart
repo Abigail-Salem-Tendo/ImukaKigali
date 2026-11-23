@@ -122,4 +122,37 @@ void main() {
   test('a signed-out user on the inbox page is sent to login', () {
     expect(authRedirect(_signedOut, AppRoutes.verifyEmail), AppRoutes.login);
   });
+
+  group('signed in with Google, no profile yet', () {
+    const needsProfile = AuthState(status: AuthStatus.needsProfile);
+
+    test('is sent to "Complete your profile" from anywhere', () {
+      expect(
+        authRedirect(needsProfile, AppRoutes.login),
+        AppRoutes.completeProfile,
+      );
+      expect(
+        authRedirect(needsProfile, AppRoutes.driverHome),
+        AppRoutes.completeProfile,
+      );
+    });
+
+    test('can stay on "Complete your profile"', () {
+      expect(authRedirect(needsProfile, AppRoutes.completeProfile), isNull);
+    });
+  });
+
+  test('leaves "Complete your profile" once the profile is saved', () {
+    expect(
+      authRedirect(_signedInAs(UserRoles.driver), AppRoutes.completeProfile),
+      AppRoutes.driverHome,
+    );
+  });
+
+  test('a signed-out user on "Complete your profile" is sent to login', () {
+    expect(
+      authRedirect(_signedOut, AppRoutes.completeProfile),
+      AppRoutes.login,
+    );
+  });
 }

@@ -26,6 +26,16 @@ abstract class AuthRepository {
     required String district,
   });
 
+  /// Creates the 'users' document for someone who is signed in (with
+  /// Google) but has no profile yet. Their email comes from that sign-in.
+  /// Throws an Exception with a readable message on failure.
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  });
+
   /// Emails a reset-password link.
   Future<void> sendPasswordReset(String email);
 

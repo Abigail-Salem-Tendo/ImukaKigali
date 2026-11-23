@@ -25,7 +25,14 @@ class AuthRepositoryImpl implements AuthRepository {
     // is found even if Firebase has not finished loading it yet.
     final firebaseUser = await _auth.authStateChanges().first;
     if (firebaseUser == null) return null;
-    return getUser(firebaseUser.uid);
+    final user = await getUser(firebaseUser.uid);
+    // Someone who closed the app on "Complete your profile" is still signed
+    // in to Firebase. Sign them out, so the app and Firebase agree that
+    // nobody is signed in; Google sign-in brings them back to that page.
+    if (user == null) {
+      await _auth.signOut();
+    }
+    return user;
   }
 
   @override
@@ -81,15 +88,12 @@ class AuthRepositoryImpl implements AuthRepository {
     );
 
     try {
-      await _users.doc(user.uid).set({
-        ...user.toMap(),
-        Fields.createdAt: FieldValue.serverTimestamp(),
-      });
-    } on FirebaseException catch (e) {
+      await _saveProfile(user);
+    } catch (_) {
       // Don't leave a login with no profile behind: remove it so the person
       // can simply try again with the same email.
       await cred.user?.delete();
-      throw Exception(e.message ?? 'Could not save your profile. Try again.');
+      rethrow;
     }
 
     // The account is ready even if this email fails to send, so a failure
@@ -100,6 +104,43 @@ class AuthRepositoryImpl implements AuthRepository {
       // Ignored on purpose (see above).
     }
     return user;
+  }
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) async {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) {
+      throw Exception('Please sign in again.');
+    }
+    final user = AppUser(
+      uid: firebaseUser.uid,
+      role: role,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      email: firebaseUser.email ?? '',
+      district: district,
+      createdAt: DateTime.now(),
+    );
+    await _saveProfile(user);
+    return user;
+  }
+
+  /// Writes a new user's 'users' document. Used by both ways of signing up.
+  Future<void> _saveProfile(AppUser user) async {
+    try {
+      await _users.doc(user.uid).set({
+        ...user.toMap(),
+        // The server's clock, so a wrong phone clock can't change it.
+        Fields.createdAt: FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw Exception(e.message ?? 'Could not save your profile. Try again.');
+    }
   }
 
   @override

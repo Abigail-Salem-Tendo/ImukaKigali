@@ -9,6 +9,7 @@ class RecordingAuthRepository implements AuthRepository {
   final List<String> signInEmails = [];
   final List<String> resetEmails = [];
   final List<AppUser> registeredUsers = [];
+  final List<AppUser> completedProfiles = [];
   int verificationEmailsSent = 0;
   int signOutCalls = 0;
   String? failWith;
@@ -57,6 +58,27 @@ class RecordingAuthRepository implements AuthRepository {
       createdAt: DateTime(2026),
     );
     registeredUsers.add(user);
+    return user;
+  }
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) async {
+    if (failWith != null) throw Exception(failWith);
+    final user = AppUser(
+      uid: 'google-user',
+      role: role,
+      fullName: fullName,
+      phone: phone,
+      email: 'diane@gmail.com',
+      district: district,
+      createdAt: DateTime(2026),
+    );
+    completedProfiles.add(user);
     return user;
   }
 

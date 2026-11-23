@@ -70,6 +70,25 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) async {
+    _maybeFail();
+    return signedIn = AppUser(
+      uid: 'google-user',
+      role: role,
+      fullName: fullName,
+      phone: phone,
+      email: 'diane@gmail.com',
+      district: district,
+      createdAt: DateTime(2026),
+    );
+  }
+
+  @override
   Future<void> sendEmailVerification() async {
     _maybeFail();
     verificationEmailsSent++;
@@ -217,6 +236,34 @@ void main() {
       final done = await bloc.stream.firstWhere((s) => s.message != null);
       expect(repo.verificationEmailsSent, 1);
       expect(done.message, contains('diane@example.com'));
+    });
+  });
+
+  group('complete profile', () {
+    const event = ProfileCompleted(
+      fullName: 'Diane Uwase',
+      phone: '+250781234567',
+      role: UserRoles.driver,
+      district: 'Gasabo',
+    );
+
+    test('saving the profile signs the user in with that role', () async {
+      repo.verified = true;
+      bloc.add(event);
+      final done = await bloc.stream.firstWhere(
+        (s) => s.status == AuthStatus.authenticated,
+      );
+      expect(done.isDriver, isTrue);
+      expect(done.user!.district, 'Gasabo');
+      expect(done.emailVerified, isTrue);
+    });
+
+    test('a failed save shows the error and stays on the page', () async {
+      repo.failWith = 'Could not save your profile. Try again.';
+      bloc.add(event);
+      final done = await bloc.stream.firstWhere((s) => s.error != null);
+      expect(done.error, 'Could not save your profile. Try again.');
+      expect(done.status, isNot(AuthStatus.authenticated));
     });
   });
 }

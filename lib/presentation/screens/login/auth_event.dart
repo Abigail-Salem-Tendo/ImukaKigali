@@ -69,3 +69,24 @@ class EmailVerificationCheckRequested extends AuthEvent {
 class VerificationEmailResent extends AuthEvent {
   const VerificationEmailResent();
 }
+
+/// Someone who signed in with Google for the first time filled in the
+/// details Google doesn't give us. Their email comes from Google.
+class ProfileCompleted extends AuthEvent {
+  const ProfileCompleted({
+    required this.fullName,
+    required this.phone,
+    required this.role,
+    required this.district,
+  });
+
+  final String fullName;
+  final String phone;
+
+  /// UserRoles.client or UserRoles.driver.
+  final String role;
+  final String district;
+
+  @override
+  List<Object?> get props => [fullName, phone, role, district];
+}

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
+import 'package:imuka_kigali/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
@@ -33,6 +34,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.verifyEmail,
       builder: (_, _) => const VerifyEmailScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.completeProfile,
+      builder: (_, _) => const CompleteProfileScreen(),
     ),
     _placeholder(AppRoutes.driverRegister1, 'Driver registration: step 1'),
     _placeholder(AppRoutes.driverRegister2, 'Driver registration: step 2'),

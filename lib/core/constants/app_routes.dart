@@ -8,6 +8,7 @@ class AppRoutes {
   static const String createAccount = '/create-account';
   static const String driverPartner = '/driver-partner';
   static const String verifyEmail = '/verify-email';
+  static const String completeProfile = '/complete-profile';
   static const String driverRegister1 = '/driver-register-1';
   static const String driverRegister2 = '/driver-register-2';
   static const String driverProfile = '/driver-profile';

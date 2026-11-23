@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutRequested>(_onLogoutRequested);
     on<EmailVerificationCheckRequested>(_onVerificationCheckRequested);
     on<VerificationEmailResent>(_onVerificationEmailResent);
+    on<ProfileCompleted>(_onProfileCompleted);
   }
 
   final AuthRepository _repo;
@@ -155,6 +156,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: 'We sent a new link to ${state.user?.email}.',
         ),
       );
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, error: _readable(e)));
+    }
+  }
+
+  Future<void> _onProfileCompleted(
+    ProfileCompleted event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final user = await _repo.completeProfile(
+        fullName: event.fullName,
+        phone: event.phone,
+        role: event.role,
+        district: event.district,
+      );
+      emit(await _signedIn(user));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: _readable(e)));
     }
