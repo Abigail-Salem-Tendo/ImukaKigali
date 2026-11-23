@@ -6,11 +6,11 @@ import 'package:imuka_kigali/core/constants/app_routes.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step1/driver_registration_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step1/driver_registration_step1_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step2/driver_registration_step2_screen.dart';
-import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
@@ -26,17 +26,6 @@ final GoRouter appRouter = GoRouter(
       authRedirect(context.read<AuthBloc>().state, state.matchedLocation),
   routes: [
     GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
-    _placeholder(AppRoutes.createAccount, 'Create account'),
-    _placeholder(AppRoutes.driverPartner, 'Driver partner registration'),
-    GoRoute(
-      path: AppRoutes.driverRegister1,
-      builder: (context, state) => const DriverRegistrationStep1Screen(),
-    ),
-    GoRoute(path: AppRoutes.driverRegister2, builder: _buildDriverRegister2),
-    GoRoute(
-      path: AppRoutes.driverProfile,
-      builder: (context, state) => const DriverProfileScreen(),
-    ),
     GoRoute(
       path: AppRoutes.createAccount,
       builder: (_, _) => const CreateAccountScreen(),
@@ -49,9 +38,15 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.verifyEmail,
       builder: (_, _) => const VerifyEmailScreen(),
     ),
-    _placeholder(AppRoutes.driverRegister1, 'Driver registration: step 1'),
-    _placeholder(AppRoutes.driverRegister2, 'Driver registration: step 2'),
-    _placeholder(AppRoutes.driverProfile, 'Driver profile'),
+    GoRoute(
+      path: AppRoutes.driverRegister1,
+      builder: (context, state) => const DriverRegistrationStep1Screen(),
+    ),
+    GoRoute(path: AppRoutes.driverRegister2, builder: _buildDriverRegister2),
+    GoRoute(
+      path: AppRoutes.driverProfile,
+      builder: (context, state) => const DriverProfileScreen(),
+    ),
     _placeholder(AppRoutes.settings, 'Settings'),
     _placeholder(AppRoutes.whereFromTo, 'Where from, where to'),
     _placeholder(AppRoutes.itemDetails, 'Item details'),
