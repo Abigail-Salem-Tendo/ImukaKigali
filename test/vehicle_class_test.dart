@@ -23,6 +23,25 @@ void main() {
     test('writes plates the standard way', () {
       expect(formatRwandaPlate(' rad428e '), 'RAD 428 E');
       expect(formatRwandaPlate('rc123a'), 'RC 123 A');
+      expect(formatRwandaPlate('rd204e'), 'RD 204 E');
+    });
+
+    test('a moto plate has one letter after the R, a car plate two', () {
+      expect(isValidRwandaPlate('RD 204 E', motoPlate: true), isTrue);
+      expect(isValidRwandaPlate('RAD 428 E', motoPlate: true), isFalse);
+      expect(isValidRwandaPlate('RAD 428 E', motoPlate: false), isTrue);
+      expect(isValidRwandaPlate('RD 204 E', motoPlate: false), isFalse);
+    });
+
+    test('a tricycle needs a moto plate, the other vehicles a car plate', () {
+      final tricycle = VehicleClasses.of(VehicleTypes.tricycle);
+      final pickup = VehicleClasses.of(VehicleTypes.pickup);
+
+      expect(tricycle.acceptsPlate('rd204e'), isTrue);
+      expect(tricycle.acceptsPlate('RAD 428 E'), isFalse);
+      expect(tricycle.plateError, 'Enter a Rwanda plate like RD 204 E.');
+      expect(pickup.acceptsPlate('RD 204 E'), isFalse);
+      expect(pickup.plateExample, 'RAD 428 E');
     });
   });
 
