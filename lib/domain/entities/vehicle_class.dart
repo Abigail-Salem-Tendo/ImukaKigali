@@ -78,6 +78,15 @@ class VehicleClasses {
   /// Every vehicle type, ordered from the smallest to the biggest.
   static const List<VehicleClass> all = [
     VehicleClass(
+      type: VehicleTypes.car,
+      label: 'Car (Toyota Vitz / Corolla)',
+      shortLabel: 'Car',
+      plateSeries: 'Automobile Standard Plate Series',
+      description: 'Boxes, suitcases and small items. No furniture.',
+      capacityKg: 300,
+      photo: 'assets/vehicles/car.jpg',
+    ),
+    VehicleClass(
       type: VehicleTypes.tricycle,
       label: 'Tricycle Cargo (Bajaj / TVS)',
       shortLabel: 'Tricycle',
@@ -88,9 +97,18 @@ class VehicleClasses {
       usesMotoPlate: true,
     ),
     VehicleClass(
+      type: VehicleTypes.hilux,
+      label: 'Pickup (Toyota Hilux)',
+      shortLabel: 'Hilux',
+      plateSeries: 'Automobile Standard Plate Series',
+      description: 'Open back. A student room or a few pieces of furniture.',
+      capacityKg: 1000,
+      photo: 'assets/vehicles/hilux.jpg',
+    ),
+    VehicleClass(
       type: VehicleTypes.pickup,
-      label: 'Pickup (Daihatsu Delta / Hilux)',
-      shortLabel: 'Pickup',
+      label: 'Light Truck (Daihatsu Delta)',
+      shortLabel: 'Light truck',
       plateSeries: 'Automobile Standard Plate Series',
       description: 'Open back. Ideal for 1–2 room apartment moves.',
       capacityKg: 1500,
