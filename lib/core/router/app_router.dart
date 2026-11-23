@@ -20,6 +20,7 @@ import 'package:imuka_kigali/presentation/screens/driver_registration_step2/driv
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
+import 'package:imuka_kigali/presentation/screens/settings/settings_screen.dart';
 import 'package:imuka_kigali/presentation/screens/verify_email/verify_email_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
@@ -57,7 +58,10 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.driverProfile,
       builder: (context, state) => const DriverProfileScreen(),
     ),
-    _placeholder(AppRoutes.settings, 'Settings'),
+    GoRoute(
+      path: AppRoutes.settings,
+      builder: (_, _) => const SettingsScreen(),
+    ),
     ShellRoute(
       builder: (context, state, child) => BlocProvider(
         create: (context) =>
