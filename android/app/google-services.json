@@ -14,11 +14,43 @@
       },
       "oauth_client": [
         {
+          "client_id": "168416389868-9nq9isti8fijkentpdvdlc1d76i2srvv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imuka.imuka_kigali",
+            "certificate_hash": "2b3077a35e423d9b2124380d213384c2ed886c10"
+          }
+        },
+        {
+          "client_id": "168416389868-fbnrrm9kqlm0ietver64b71dqkl8l20q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imuka.imuka_kigali",
+            "certificate_hash": "ed68d56b427c45edbc7b64f818168fbade381d55"
+          }
+        },
+        {
+          "client_id": "168416389868-icdovr4joc949v6sngd68543nr22tgbt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imuka.imuka_kigali",
+            "certificate_hash": "d1ff0a7baa5c01a923a4092ca98c95569baec083"
+          }
+        },
+        {
           "client_id": "168416389868-jha94innrabnsrm9vhamuark2q2cqvn7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.imuka.imuka_kigali",
             "certificate_hash": "47dea9654fb5a53e4e3d68814bb8e9b8734b8fce"
+          }
+        },
+        {
+          "client_id": "168416389868-ljrjt1lkmgp2qvloh139lv6peomf40le.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imuka.imuka_kigali",
+            "certificate_hash": "9b20bcd91956787e214147c8001b4fbae35f42f6"
           }
         },
         {
