@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
-
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
 import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';

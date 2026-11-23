@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
+import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step2/vehicle_type_card.dart';
 
@@ -24,57 +25,45 @@ class VehicleOptionTile extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          side: BorderSide(
-            color: selected ? colors.primary : colors.outlineVariant,
-            width: selected ? 2 : AppSpacing.borderWidth,
-          ),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Row(
-              children: [
-                VehicleTypePhoto(
-                  vehicleClass: vehicleClass,
-                  width: 80,
-                  height: 58,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        vehicleClass.label,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Up to ${vehicleClass.capacityLabel} • '
-                        '${vehicleClass.description}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? colors.primary : colors.outline,
-                ),
-              ],
+      child: AppCard(
+        onTap: onTap,
+        highlighted: selected,
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Row(
+          children: [
+            VehicleTypePhoto(
+              vehicleClass: vehicleClass,
+              width: 80,
+              height: 58,
             ),
-          ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    vehicleClass.label,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Up to ${vehicleClass.capacityLabel} • '
+                    '${vehicleClass.description}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Icon(
+              selected ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: selected ? colors.primary : colors.outline,
+            ),
+          ],
         ),
       ),
     );
