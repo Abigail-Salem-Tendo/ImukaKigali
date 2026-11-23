@@ -3,6 +3,12 @@
 // No Firebase here: screens and blocs depend on this, not on the Firebase code.
 import '../entities/app_user.dart';
 
+/// Thrown when the user closes the Google account picker. Not an error:
+/// they changed their mind, so the app shows nothing.
+class SignInCancelled implements Exception {
+  const SignInCancelled();
+}
+
 abstract class AuthRepository {
   /// The signed-in user's profile, or null when nobody is signed in.
   /// Waits for Firebase to restore a saved session first, so it is safe to
@@ -22,6 +28,23 @@ abstract class AuthRepository {
     required String email,
     required String phone,
     required String password,
+    required String role,
+    required String district,
+  });
+
+  /// Signs in with a Google account and returns the user's profile, or null
+  /// if this is their first time: they are signed in, but must complete
+  /// their profile before using the app.
+  /// Throws [SignInCancelled] if they close the account picker, or an
+  /// Exception with a readable message on failure.
+  Future<AppUser?> signInWithGoogle();
+
+  /// Creates the 'users' document for someone who is signed in (with
+  /// Google) but has no profile yet. Their email comes from that sign-in.
+  /// Throws an Exception with a readable message on failure.
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
     required String role,
     required String district,
   });

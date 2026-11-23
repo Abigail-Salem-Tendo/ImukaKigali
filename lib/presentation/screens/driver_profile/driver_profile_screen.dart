@@ -7,8 +7,10 @@ import 'package:imuka_kigali/core/widgets/app_snack_bar.dart';
 import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/domain/entities/vehicle.dart';
 import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/driver_profile/name_dialog.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/plate_number_dialog.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/profile_widgets.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step2/vehicle_type_card.dart';
@@ -31,9 +33,10 @@ class DriverProfileScreen extends StatelessWidget {
     }
 
     return BlocProvider(
-      create: (ctx) =>
-          DriverProfileBloc(ctx.read<VehicleRepository>())
-            ..add(DriverProfileRequested(user.uid)),
+      create: (ctx) => DriverProfileBloc(
+        ctx.read<VehicleRepository>(),
+        ctx.read<AuthRepository>(),
+      )..add(DriverProfileRequested(user.uid)),
       child: _DriverProfileView(user: user),
     );
   }
@@ -47,8 +50,10 @@ class _DriverProfileView extends StatelessWidget {
   final AppUser user;
 
   /// Draws the page. One listener shows error snackbars, another shows
-  /// success snackbars. The body shows a spinner while loading, a retry
-  /// view if the first load failed, and the profile content otherwise.
+  /// success snackbars, and a third reloads the signed-in user after the
+  /// name was saved, so the new name appears. The body shows a spinner
+  /// while loading, a retry view if the first load failed, and the
+  /// profile content otherwise.
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -67,6 +72,12 @@ class _DriverProfileView extends StatelessWidget {
               current.message != null && previous.message != current.message,
           listener: (context, state) =>
               showAppSnackBar(context, state.message ?? 'Saved.'),
+        ),
+        BlocListener<DriverProfileBloc, DriverProfileState>(
+          listenWhen: (previous, current) =>
+              current.userUpdated && !previous.userUpdated,
+          listener: (context, state) =>
+              context.read<AuthBloc>().add(const AuthCheckRequested()),
         ),
       ],
       child: Scaffold(
@@ -94,7 +105,7 @@ class _DriverProfileView extends StatelessWidget {
 }
 
 /// The choices in the Edit button's menu.
-enum _EditChoice { vehicleClass, plate }
+enum _EditChoice { name, vehicleClass, plate }
 
 /// The scrolling list of profile cards.
 class _ProfileContent extends StatelessWidget {
@@ -118,9 +129,7 @@ class _ProfileContent extends StatelessWidget {
           fullName: user.fullName,
           phone: user.phone,
           email: user.email,
-          onEditPressed: vehicle == null
-              ? null
-              : () => _showEditMenu(context, vehicle),
+          onEditPressed: () => _showEditMenu(context, vehicle),
         ),
         const SizedBox(height: AppSpacing.lg),
         const PerformanceSnapshot(),
@@ -152,9 +161,10 @@ class _ProfileContent extends StatelessWidget {
     );
   }
 
-  /// Opens a bottom menu with "Change vehicle class" and "Edit plate
-  /// number", then starts the action the driver chose.
-  Future<void> _showEditMenu(BuildContext context, Vehicle vehicle) async {
+  /// Opens a bottom menu with "Edit name" and, when the driver has a
+  /// vehicle, "Change vehicle class" and "Edit plate number", then starts
+  /// the action the driver chose.
+  Future<void> _showEditMenu(BuildContext context, Vehicle? vehicle) async {
     final choice = await showModalBottomSheet<_EditChoice>(
       context: context,
       showDragHandle: true,
@@ -163,16 +173,23 @@ class _ProfileContent extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.swap_horiz),
-              title: const Text('Change vehicle class'),
-              onTap: () =>
-                  Navigator.pop(sheetContext, _EditChoice.vehicleClass),
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Edit name'),
+              onTap: () => Navigator.pop(sheetContext, _EditChoice.name),
             ),
-            ListTile(
-              leading: const Icon(Icons.confirmation_number_outlined),
-              title: const Text('Edit plate number'),
-              onTap: () => Navigator.pop(sheetContext, _EditChoice.plate),
-            ),
+            if (vehicle != null) ...[
+              ListTile(
+                leading: const Icon(Icons.swap_horiz),
+                title: const Text('Change vehicle class'),
+                onTap: () =>
+                    Navigator.pop(sheetContext, _EditChoice.vehicleClass),
+              ),
+              ListTile(
+                leading: const Icon(Icons.confirmation_number_outlined),
+                title: const Text('Edit plate number'),
+                onTap: () => Navigator.pop(sheetContext, _EditChoice.plate),
+              ),
+            ],
           ],
         ),
       ),
@@ -182,12 +199,29 @@ class _ProfileContent extends StatelessWidget {
       return;
     }
     switch (choice) {
+      case _EditChoice.name:
+        await _editName(context);
       case _EditChoice.vehicleClass:
-        await _changeVehicleType(context, vehicle);
+        if (vehicle != null) {
+          await _changeVehicleType(context, vehicle);
+        }
       case _EditChoice.plate:
-        await _editPlate(context, vehicle);
+        if (vehicle != null) {
+          await _editPlate(context, vehicle);
+        }
       case null:
         break;
+    }
+  }
+
+  /// Opens the name dialog filled with the driver's name and sends the new
+  /// name to the bloc. The bloc is read before waiting, so the context is
+  /// not used after the dialog closes.
+  Future<void> _editName(BuildContext context) async {
+    final bloc = context.read<DriverProfileBloc>();
+    final name = await showNameDialog(context, initialName: user.fullName);
+    if (name != null) {
+      bloc.add(DriverNameChanged(user: user, fullName: name));
     }
   }
 
@@ -208,6 +242,7 @@ class _ProfileContent extends StatelessWidget {
     final bloc = context.read<DriverProfileBloc>();
     final plate = await showPlateNumberDialog(
       context,
+      vehicleType: vehicle.vehicleType,
       initialPlate: vehicle.plateNumber,
     );
     if (plate != null) {
@@ -226,7 +261,7 @@ class _ProfileContent extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    final plate = await showPlateNumberDialog(context);
+    final plate = await showPlateNumberDialog(context, vehicleType: type);
     if (plate != null) {
       bloc.add(DriverVehicleAdded(vehicleType: type, plateNumber: plate));
     }

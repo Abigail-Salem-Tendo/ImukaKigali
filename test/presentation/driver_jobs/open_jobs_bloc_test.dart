@@ -4,6 +4,7 @@ import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/open_jobs_bloc.dart';
 
 import '../../helpers/fake_repositories.dart';
+import '../../helpers/fake_vehicle_repository.dart';
 
 void main() {
   late FakeDriverJobRepository jobRepo;
@@ -16,7 +17,7 @@ void main() {
 
   setUp(() {
     jobRepo = FakeDriverJobRepository();
-    vehicleRepo = FakeVehicleRepository()..vehicle = testVehicle();
+    vehicleRepo = FakeVehicleRepository()..stored = testVehicle();
     bloc = OpenJobsBloc(jobRepo, vehicleRepo);
   });
 
@@ -27,7 +28,7 @@ void main() {
   });
 
   test('watches open jobs for the type of my own vehicle', () async {
-    vehicleRepo.vehicle = truck;
+    vehicleRepo.stored = truck;
     final states = expectLater(
       bloc.stream,
       emitsInOrder([
@@ -46,12 +47,12 @@ void main() {
     jobRepo.openJobs.add([jobA, jobB]);
 
     await states;
-    expect(vehicleRepo.requestedDriverId, driverId);
+    expect(vehicleRepo.requestedDriverIds, [driverId]);
     expect(jobRepo.watchedVehicleType, VehicleTypes.truck);
   });
 
   test('a driver without a vehicle sees no jobs', () async {
-    vehicleRepo.vehicle = null;
+    vehicleRepo.stored = null;
 
     bloc.add(const OpenJobsStarted(driverId));
     final state = await bloc.stream.firstWhere(
@@ -63,7 +64,7 @@ void main() {
   });
 
   test('shows the error when the vehicle cannot be loaded', () async {
-    vehicleRepo.getVehicleError = 'No internet connection. Please try again.';
+    vehicleRepo.getError = 'No internet connection. Please try again.';
 
     bloc.add(const OpenJobsStarted(driverId));
     final state = await bloc.stream.firstWhere(
@@ -79,7 +80,7 @@ void main() {
 
     expect(state.status, OpenJobsStatus.failure);
     expect(state.error, 'Please sign in again to see open jobs');
-    expect(vehicleRepo.requestedDriverId, isNull);
+    expect(vehicleRepo.requestedDriverIds, isEmpty);
   });
 
   test(

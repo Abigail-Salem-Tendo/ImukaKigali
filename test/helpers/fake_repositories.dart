@@ -7,7 +7,6 @@ import 'package:imuka_kigali/domain/entities/move_request.dart';
 import 'package:imuka_kigali/domain/entities/vehicle.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
-import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 
 const driverId = 'driver1';
 
@@ -129,6 +128,17 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> sendPasswordReset(String email) => throw UnimplementedError();
 
   @override
+  Future<AppUser?> signInWithGoogle() => throw UnimplementedError();
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) => throw UnimplementedError();
+
+  @override
   Future<void> sendEmailVerification() => throw UnimplementedError();
 
   @override
@@ -139,29 +149,4 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> updateUser(AppUser user) => throw UnimplementedError();
-}
-
-class FakeVehicleRepository implements VehicleRepository {
-  Vehicle? vehicle;
-  String? getVehicleError;
-  String? requestedDriverId;
-
-  @override
-  Future<Vehicle?> getVehicle(String driverId) async {
-    requestedDriverId = driverId;
-    if (getVehicleError != null) throw Exception(getVehicleError);
-    return vehicle;
-  }
-
-  @override
-  Future<Vehicle> addVehicle({
-    required String vehicleType,
-    required String plateNumber,
-  }) => throw UnimplementedError();
-
-  @override
-  Future<void> updateVehicle(Vehicle vehicle) => throw UnimplementedError();
-
-  @override
-  Future<void> deleteVehicle(String vehicleId) => throw UnimplementedError();
 }

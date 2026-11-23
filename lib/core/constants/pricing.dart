@@ -2,12 +2,14 @@
 class VehicleTypes {
   VehicleTypes._();
 
+  static const String car = 'car';
   static const String tricycle = 'tricycle';
+  static const String hilux = 'hilux';
   static const String pickup = 'pickup';
   static const String van = 'van';
   static const String truck = 'truck';
 
-  static const List<String> all = [tricycle, pickup, van, truck];
+  static const List<String> all = [car, tricycle, hilux, pickup, van, truck];
 }
 
 /// Pricing numbers used only by FareCalculator.
@@ -17,7 +19,9 @@ class Pricing {
 
   /// Price per km of road distance. A bigger vehicle has a bigger rate.
   static const Map<String, double> ratePerKm = {
+    VehicleTypes.car: 500,
     VehicleTypes.tricycle: 400,
+    VehicleTypes.hilux: 600,
     VehicleTypes.pickup: 700,
     VehicleTypes.van: 900,
     VehicleTypes.truck: 1400,

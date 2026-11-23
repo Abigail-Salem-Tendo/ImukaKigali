@@ -4,7 +4,7 @@ import 'package:imuka_kigali/core/theme/app_spacing.dart';
 import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 
 /// A tappable card for one vehicle type, with its photo, capacity and
-/// price per minute. Registration step 2 and the driver profile use it.
+/// price per km. Registration step 2 and the driver profile use it.
 class VehicleTypeCard extends StatelessWidget {
   /// Creates the card. [selected] draws it with a highlighted border and
   /// [onTap] runs when the driver taps it.
@@ -161,7 +161,9 @@ class VehicleTypeIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final icon = switch (vehicleClass.type) {
+      VehicleTypes.car => Icons.directions_car,
       VehicleTypes.tricycle => Icons.two_wheeler,
+      VehicleTypes.hilux => Icons.airport_shuttle,
       VehicleTypes.pickup => Icons.airport_shuttle,
       VehicleTypes.van => Icons.local_shipping,
       _ => Icons.local_shipping_outlined,

@@ -67,4 +67,25 @@ class Validators {
   /// Strips spaces, dashes and brackets so "078 123-4567" validates.
   static String normalizePhone(String value) =>
       value.replaceAll(RegExp(r'[\s\-()]'), '');
+
+  /// The number as we save it, "+250788123456", from what was typed in a
+  /// field that already shows "+250" in front.
+  static String fullRwandanPhone(String typed) {
+    var digits = normalizePhone(typed);
+    // Left empty, so Validators.phone says "required" instead of "not valid".
+    if (digits.isEmpty) {
+      return '';
+    }
+    // Many people type their number the local way ("0788 123 456") or
+    // with the code ("250 788…"). Remove that start so "+250" isn't
+    // added twice.
+    if (digits.startsWith('+250')) {
+      digits = digits.substring(4);
+    } else if (digits.startsWith('250')) {
+      digits = digits.substring(3);
+    } else if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    return '+250$digits';
+  }
 }

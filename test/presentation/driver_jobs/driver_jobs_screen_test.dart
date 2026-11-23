@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
+import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
@@ -10,8 +12,12 @@ import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
 import '../../helpers/fake_repositories.dart';
+import '../../helpers/fake_vehicle_repository.dart';
 
 void main() {
+  // Read from VehicleClasses, so renaming a vehicle doesn't break this test.
+  final pickupLabel = VehicleClasses.of(VehicleTypes.pickup).shortLabel;
+
   late FakeDriverJobRepository jobRepo;
   late FakeAuthRepository authRepo;
   late FakeVehicleRepository vehicleRepo;
@@ -22,7 +28,7 @@ void main() {
     authRepo = FakeAuthRepository()
       ..signedIn = testUser(driverId, 'Jean Driver', role: UserRoles.driver)
       ..users['client1'] = testUser('client1', 'Diane Uwase');
-    vehicleRepo = FakeVehicleRepository()..vehicle = testVehicle();
+    vehicleRepo = FakeVehicleRepository()..stored = testVehicle();
     authBloc = AuthBloc(authRepo);
   });
 
@@ -78,7 +84,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Gasabo District Hub'), findsOneWidget);
-      expect(find.text('Pickup • Max load 1.5 t'), findsOneWidget);
+      expect(find.text('$pickupLabel • Max load 1.5 t'), findsOneWidget);
       expect(find.text('DISPATCH #IMK-A842'), findsOneWidget);
       expect(find.text('DISPATCH #IMK-B901'), findsOneWidget);
       expect(find.text('Accept 24,000 RWF'), findsOneWidget);
@@ -152,7 +158,7 @@ void main() {
   testWidgets('a driver without a vehicle is asked to register one', (
     tester,
   ) async {
-    vehicleRepo.vehicle = null;
+    vehicleRepo.stored = null;
     await openScreen(tester);
     await tester.pump();
 

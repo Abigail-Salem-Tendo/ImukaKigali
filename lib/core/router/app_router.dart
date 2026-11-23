@@ -9,6 +9,8 @@ import 'package:imuka_kigali/presentation/screens/item_details/item_details_scre
 import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_screen.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
+import 'package:imuka_kigali/presentation/screens/client_home/client_home_screen.dart';
+import 'package:imuka_kigali/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
@@ -20,6 +22,7 @@ import 'package:imuka_kigali/presentation/screens/driver_registration_step2/driv
 import 'package:imuka_kigali/presentation/screens/job_logs/job_logs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/login/login_screen.dart';
+import 'package:imuka_kigali/presentation/screens/settings/settings_screen.dart';
 import 'package:imuka_kigali/presentation/screens/verify_email/verify_email_screen.dart';
 
 /// All routes. Each member replaces the placeholder of their own screens with
@@ -45,6 +48,10 @@ final GoRouter appRouter = GoRouter(
       builder: (_, _) => const VerifyEmailScreen(),
     ),
     GoRoute(
+      path: AppRoutes.completeProfile,
+      builder: (_, _) => const CompleteProfileScreen(),
+    ),
+    GoRoute(
       path: AppRoutes.driverRegister1,
       builder: (context, state) => const DriverRegistrationStep1Screen(),
     ),
@@ -53,7 +60,14 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.driverProfile,
       builder: (context, state) => const DriverProfileScreen(),
     ),
-    _placeholder(AppRoutes.settings, 'Settings'),
+    GoRoute(
+      path: AppRoutes.settings,
+      builder: (_, _) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.clientHome,
+      builder: (_, _) => const ClientHomeScreen(),
+    ),
     ShellRoute(
       builder: (context, state, child) => BlocProvider(
         create: (context) =>

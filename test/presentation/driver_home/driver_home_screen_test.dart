@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imuka_kigali/core/constants/firestore_constants.dart';
+import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/core/theme/app_theme.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
@@ -10,8 +12,12 @@ import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_screen
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
 
 import '../../helpers/fake_repositories.dart';
+import '../../helpers/fake_vehicle_repository.dart';
 
 void main() {
+  // Read from VehicleClasses, so renaming a vehicle doesn't break this test.
+  final pickupLabel = VehicleClasses.of(VehicleTypes.pickup).shortLabel;
+
   late FakeDriverJobRepository jobRepo;
   late FakeAuthRepository authRepo;
   late FakeVehicleRepository vehicleRepo;
@@ -21,7 +27,7 @@ void main() {
     jobRepo = FakeDriverJobRepository();
     authRepo = FakeAuthRepository()
       ..signedIn = testUser(driverId, 'Jean Driver', role: UserRoles.driver);
-    vehicleRepo = FakeVehicleRepository()..vehicle = testVehicle();
+    vehicleRepo = FakeVehicleRepository()..stored = testVehicle();
     authBloc = AuthBloc(authRepo);
   });
 
@@ -61,7 +67,7 @@ void main() {
   testWidgets('a driver without a vehicle gets a button to register one', (
     tester,
   ) async {
-    vehicleRepo.vehicle = null;
+    vehicleRepo.stored = null;
     await openScreen(tester);
 
     expect(find.text('Add your vehicle first'), findsOneWidget);
@@ -84,13 +90,13 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('2 open jobs for your Pickup'), findsOneWidget);
+    expect(find.text('2 open jobs for your $pickupLabel'), findsOneWidget);
     expect(find.text('Gasabo District Hub'), findsOneWidget);
     expect(find.text('24,000 RWF'), findsOneWidget);
     expect(find.text('from 1 move'), findsOneWidget);
     expect(find.text('1 accepted'), findsOneWidget);
     expect(find.text('Kimihurura → Remera'), findsOneWidget);
     expect(find.text('12,000 RWF'), findsOneWidget);
-    expect(find.text('Pickup • RAD 428 E'), findsOneWidget);
+    expect(find.text('$pickupLabel • RAD 428 E'), findsOneWidget);
   });
 }

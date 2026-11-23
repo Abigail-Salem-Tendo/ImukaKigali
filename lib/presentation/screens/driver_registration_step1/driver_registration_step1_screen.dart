@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
 import 'package:imuka_kigali/core/widgets/app_snack_bar.dart';
-import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/vehicle_repository.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step1/driver_registration_bloc.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/email_suggestions.dart';
+import 'package:imuka_kigali/presentation/screens/driver_registration_step1/kigali_sectors.dart';
 import 'package:imuka_kigali/presentation/screens/driver_registration_step1/registration_widget.dart';
 
 /// Driver registration, step 1: personal details, contact and base location.
@@ -136,22 +137,37 @@ class _Step1View extends StatelessWidget {
                       ),
                     ),
                     const FieldLabel('Email Address', isRequired: true),
-                    TextFormField(
-                      initialValue: state.email,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autocorrect: false,
-                      decoration: InputDecoration(
-                        hintText: 'e.g. jeanclaude.mugisha@gmail.com',
-                        prefixIcon: const Icon(Icons.mail_outline),
-                        errorText: errorIf(state.emailError),
-                      ),
-                      onChanged: (value) => bloc.add(
+                    // Suggests "gmail.com" and other services in a list
+                    // under the field as soon as "@" is typed.
+                    Autocomplete<String>(
+                      initialValue: TextEditingValue(text: state.email),
+                      optionsBuilder: (value) => emailSuggestions(value.text),
+                      onSelected: (email) => bloc.add(
                         RegistrationFieldChanged(
                           RegistrationField.email,
-                          value,
+                          email,
                         ),
                       ),
+                      fieldViewBuilder: (context, controller, focusNode, _) {
+                        return TextFormField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autocorrect: false,
+                          decoration: InputDecoration(
+                            hintText: 'e.g. jeanclaude.mugisha@gmail.com',
+                            prefixIcon: const Icon(Icons.mail_outline),
+                            errorText: errorIf(state.emailError),
+                          ),
+                          onChanged: (value) => bloc.add(
+                            RegistrationFieldChanged(
+                              RegistrationField.email,
+                              value,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     const FieldLabel('Secure Password', isRequired: true),
                     TextFormField(
@@ -207,8 +223,9 @@ class _Step1View extends StatelessWidget {
                   title: 'Base Location in Kigali',
                   children: [
                     Text(
-                      'Select where you usually park or start your shifts to '
-                      'receive priority nearby move dispatches.',
+                      'Select the sectors where you usually park or start '
+                      'your shifts. The first one you pick sets your '
+                      'district.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
@@ -218,7 +235,7 @@ class _Step1View extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'Active Operating Hubs (Select 2+)',
+                            'Operating Sectors (Select 2+)',
                             style: theme.textTheme.labelLarge,
                           ),
                         ),
@@ -230,20 +247,29 @@ class _Step1View extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: [
-                        for (final hub in kigaliHubDistricts.keys)
-                          FilterChip(
-                            label: Text(hub),
-                            selected: state.operatingHubs.contains(hub),
-                            onSelected: (_) =>
-                                bloc.add(RegistrationHubToggled(hub)),
-                          ),
-                      ],
-                    ),
+                    for (final district in kigaliSectorsByDistrict.entries) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        '${district.key} District',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          for (final sector in district.value)
+                            FilterChip(
+                              label: Text(sector),
+                              selected: state.operatingHubs.contains(sector),
+                              onSelected: (_) =>
+                                  bloc.add(RegistrationHubToggled(sector)),
+                            ),
+                        ],
+                      ),
+                    ],
                     if (hubsError != null) GroupErrorText(hubsError),
                   ],
                 ),
@@ -266,13 +292,22 @@ class _CountryCodePrefix extends StatelessWidget {
   /// Creates the prefix. It needs no data.
   const _CountryCodePrefix();
 
-  /// Draws "+250" with space on both sides.
+  /// Draws "+250" with space on both sides, centred from top to bottom
+  /// so it lines up with the number typed next to it.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Text('+250', style: theme.textTheme.titleSmall),
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          '+250',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }

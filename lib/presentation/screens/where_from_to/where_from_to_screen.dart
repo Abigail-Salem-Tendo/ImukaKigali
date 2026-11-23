@@ -15,7 +15,13 @@ class WhereFromToScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Where to?')),
+      appBar: AppBar(
+        // This screen sits in a ShellRoute, which has its own navigator, so
+        // the AppBar can't see the client home behind it and shows no back
+        // arrow by itself.
+        leading: BackButton(onPressed: () => context.go(AppRoutes.clientHome)),
+        title: const Text('Where to?'),
+      ),
       body: SafeArea(
         child: BlocBuilder<CreateRequestBloc, CreateRequestState>(
           builder: (context, state) {
