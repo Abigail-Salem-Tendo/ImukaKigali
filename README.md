@@ -9,6 +9,8 @@ pays (simulated) and rates the driver.
 
 Group 18, Mobile Application Development, African Leadership University.
 
+Demo Video https://drive.google.com/file/d/1KGc9tmlG93kFGkzqrvZ--4DZc4Dvy83j/view?usp=drive_link 
+
 ## Screenshots
 
 | Login | Client home | Driver registration | Driver home |
