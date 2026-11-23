@@ -38,6 +38,9 @@ class JobLogsScreen extends StatelessWidget {
         },
         child: Scaffold(
           appBar: AppBar(centerTitle: false, title: const _JobLogsTitle()),
+          bottomNavigationBar: const DriverBottomNav(
+            current: DriverTab.jobLogs,
+          ),
           body: SafeArea(
             child: BlocBuilder<JobLogsBloc, JobLogsState>(
               builder: (context, state) => switch (state.status) {

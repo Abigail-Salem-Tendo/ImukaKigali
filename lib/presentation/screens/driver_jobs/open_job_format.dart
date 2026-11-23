@@ -7,8 +7,3 @@ String postedAgoLabel(DateTime createdAt, DateTime now) {
   if (age.inDays == 1) return 'Posted 1 day ago';
   return 'Posted ${age.inDays} days ago';
 }
-
-String vehicleTypeLabel(String vehicleType) {
-  if (vehicleType.isEmpty) return vehicleType;
-  return vehicleType[0].toUpperCase() + vehicleType.substring(1);
-}

@@ -12,6 +12,7 @@ import 'package:imuka_kigali/core/router/auth_redirect.dart';
 import 'package:imuka_kigali/presentation/screens/client_home/client_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_screen.dart';
@@ -89,7 +90,10 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           FindingDriverScreen(requestId: state.pathParameters['requestId']!),
     ),
-    _placeholder(AppRoutes.driverHome, 'Driver home'),
+    GoRoute(
+      path: AppRoutes.driverHome,
+      builder: (_, _) => const DriverHomeScreen(),
+    ),
     GoRoute(
       path: AppRoutes.driverJobs,
       builder: (_, _) => const DriverJobsScreen(),
