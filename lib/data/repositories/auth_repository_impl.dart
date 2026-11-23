@@ -91,7 +91,45 @@ class AuthRepositoryImpl implements AuthRepository {
       await cred.user?.delete();
       throw Exception(e.message ?? 'Could not save your profile. Try again.');
     }
+
+    // The account is ready even if this email fails to send, so a failure
+    // here is ignored: the "Check your inbox" screen has a Resend button.
+    try {
+      await cred.user!.sendEmailVerification();
+    } on FirebaseAuthException {
+      // Ignored on purpose (see above).
+    }
     return user;
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    try {
+      await _auth.currentUser?.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_readable(e));
+    }
+  }
+
+  @override
+  Future<bool> isEmailVerified() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return false;
+    }
+    try {
+      // Firebase remembers the user as they were at login. reload() fetches
+      // them again, so a link clicked a moment ago is seen.
+      await user.reload();
+    } on FirebaseAuthException {
+      // reload() needs internet. Every sign-in asks this question, so
+      // failing here would log people out (or break a sign-up that worked)
+      // just because they are offline. The last known answer is used instead.
+      return user.emailVerified;
+    }
+    // Read currentUser again: reload() refreshes Firebase's copy, not the
+    // old `user` object we are holding.
+    return _auth.currentUser?.emailVerified ?? false;
   }
 
   @override

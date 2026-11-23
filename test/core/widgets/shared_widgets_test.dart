@@ -111,4 +111,17 @@ void main() {
     await tester.pump();
     expect(find.text('Could not log in'), findsOneWidget);
   });
+
+  testWidgets('BrandHeader shows the app name, and a subtitle when given', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(const BrandHeader()));
+    expect(find.text('Imuka Kigali'), findsOneWidget);
+    expect(find.text('Driver Partner'), findsNothing);
+
+    await tester.pumpWidget(
+      _wrap(const BrandHeader(subtitle: 'Driver Partner')),
+    );
+    expect(find.text('Driver Partner'), findsOneWidget);
+  });
 }
