@@ -9,10 +9,10 @@ sealed class OpenJobsEvent extends Equatable {
 }
 
 class OpenJobsStarted extends OpenJobsEvent {
-  const OpenJobsStarted(this.vehicleType);
+  const OpenJobsStarted(this.driverId);
 
-  final String vehicleType;
+  final String driverId;
 
   @override
-  List<Object?> get props => [vehicleType];
+  List<Object?> get props => [driverId];
 }

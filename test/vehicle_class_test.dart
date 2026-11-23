@@ -67,9 +67,18 @@ void main() {
     });
 
     test('writes capacities as readable text', () {
+      expect(VehicleClasses.of(VehicleTypes.car).capacityLabel, '300 kg');
       expect(VehicleClasses.of(VehicleTypes.tricycle).capacityLabel, '350 kg');
+      expect(VehicleClasses.of(VehicleTypes.hilux).capacityLabel, '1 t');
       expect(VehicleClasses.of(VehicleTypes.pickup).capacityLabel, '1.5 t');
       expect(VehicleClasses.of(VehicleTypes.van).capacityLabel, '3 t');
+    });
+
+    test('the car and the Hilux use car plates like RAD 428 E', () {
+      for (final type in [VehicleTypes.car, VehicleTypes.hilux]) {
+        expect(VehicleClasses.of(type).acceptsPlate('RAD 428 E'), isTrue);
+        expect(VehicleClasses.of(type).acceptsPlate('RD 204 E'), isFalse);
+      }
     });
 
     test('writes the rate per km with a comma every 3 digits', () {

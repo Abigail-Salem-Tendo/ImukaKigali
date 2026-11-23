@@ -4,6 +4,7 @@ import 'package:imuka_kigali/core/constants/firestore_constants.dart';
 import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/domain/entities/app_user.dart';
 import 'package:imuka_kigali/domain/entities/move_request.dart';
+import 'package:imuka_kigali/domain/entities/vehicle.dart';
 import 'package:imuka_kigali/domain/repositories/auth_repository.dart';
 import 'package:imuka_kigali/domain/repositories/driver_job_repository.dart';
 
@@ -46,6 +47,16 @@ AppUser testUser(
     email: '$uid@example.com',
     district: 'Gasabo',
     createdAt: DateTime(2026),
+  );
+}
+
+Vehicle testVehicle({String vehicleType = VehicleTypes.pickup}) {
+  return Vehicle(
+    id: 'vehicle1',
+    driverId: driverId,
+    vehicleType: vehicleType,
+    plateNumber: 'RAD 428 E',
+    capacityKg: 1500,
   );
 }
 
@@ -115,6 +126,17 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> sendPasswordReset(String email) => throw UnimplementedError();
+
+  @override
+  Future<AppUser?> signInWithGoogle() => throw UnimplementedError();
+
+  @override
+  Future<AppUser> completeProfile({
+    required String fullName,
+    required String phone,
+    required String role,
+    required String district,
+  }) => throw UnimplementedError();
 
   @override
   Future<void> sendEmailVerification() => throw UnimplementedError();

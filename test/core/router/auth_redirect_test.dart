@@ -41,10 +41,10 @@ void main() {
   });
 
   group('signed in', () {
-    test('a client on the login page goes to where-from-to', () {
+    test('a client on the login page goes to client home', () {
       expect(
         authRedirect(_signedInAs(UserRoles.client), AppRoutes.login),
-        AppRoutes.whereFromTo,
+        AppRoutes.clientHome,
       );
     });
 
@@ -76,7 +76,7 @@ void main() {
     test('a client is sent away from driver pages', () {
       expect(
         authRedirect(_signedInAs(UserRoles.client), AppRoutes.driverHome),
-        AppRoutes.whereFromTo,
+        AppRoutes.clientHome,
       );
     });
 
@@ -98,7 +98,7 @@ void main() {
     test('leaves the inbox page once the email is verified', () {
       expect(
         authRedirect(_signedInAs(UserRoles.client), AppRoutes.verifyEmail),
-        AppRoutes.whereFromTo,
+        AppRoutes.clientHome,
       );
     });
   });
@@ -121,5 +121,38 @@ void main() {
 
   test('a signed-out user on the inbox page is sent to login', () {
     expect(authRedirect(_signedOut, AppRoutes.verifyEmail), AppRoutes.login);
+  });
+
+  group('signed in with Google, no profile yet', () {
+    const needsProfile = AuthState(status: AuthStatus.needsProfile);
+
+    test('is sent to "Complete your profile" from anywhere', () {
+      expect(
+        authRedirect(needsProfile, AppRoutes.login),
+        AppRoutes.completeProfile,
+      );
+      expect(
+        authRedirect(needsProfile, AppRoutes.driverHome),
+        AppRoutes.completeProfile,
+      );
+    });
+
+    test('can stay on "Complete your profile"', () {
+      expect(authRedirect(needsProfile, AppRoutes.completeProfile), isNull);
+    });
+  });
+
+  test('leaves "Complete your profile" once the profile is saved', () {
+    expect(
+      authRedirect(_signedInAs(UserRoles.driver), AppRoutes.completeProfile),
+      AppRoutes.driverHome,
+    );
+  });
+
+  test('a signed-out user on "Complete your profile" is sent to login', () {
+    expect(
+      authRedirect(_signedOut, AppRoutes.completeProfile),
+      AppRoutes.login,
+    );
   });
 }

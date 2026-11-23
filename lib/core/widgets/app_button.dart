@@ -3,7 +3,7 @@
 //
 //   AppButton(label: 'Post move request', onPressed: ..., trailingIcon: Icons.arrow_forward)
 //   AppButton.secondary(label: 'View Driver Profile', icon: Icons.person_outline, onPressed: ...)
-//   AppButton.tonal(label: 'Counter-Offer / Bid', onPressed: ...)
+//   AppButton.tonal(label: 'Call driver', onPressed: ...)
 //   AppButton.danger(label: 'Cancel Move Request', icon: Icons.close, onPressed: ...)
 //   AppButton.text(label: 'View more', onPressed: ...)
 //
