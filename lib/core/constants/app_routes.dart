@@ -1,4 +1,4 @@
-/// Every route path lives here. Use these, never type a path in a screen.
+// Every route path lives here. Use these, never type a path in a screen.
 
 class AppRoutes {
   AppRoutes._();

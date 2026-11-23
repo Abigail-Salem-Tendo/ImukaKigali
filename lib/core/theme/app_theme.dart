@@ -12,32 +12,32 @@ class AppTheme {
   static const String fontFamily = 'Poppins';
 
   static ThemeData get light => _build(
-        brightness: Brightness.light,
-        primary: AppColors.lightPrimary,
-        onPrimary: AppColors.lightOnPrimary,
-        secondary: AppColors.lightSecondary,
-        onSecondary: AppColors.lightOnSecondary,
-        background: AppColors.lightBackground,
-        surface: AppColors.lightSurface,
-        text: AppColors.lightText,
-        textSecondary: AppColors.lightTextSecondary,
-        border: AppColors.lightBorder,
-        error: AppColors.lightError,
-      );
+    brightness: Brightness.light,
+    primary: AppColors.lightPrimary,
+    onPrimary: AppColors.lightOnPrimary,
+    secondary: AppColors.lightSecondary,
+    onSecondary: AppColors.lightOnSecondary,
+    background: AppColors.lightBackground,
+    surface: AppColors.lightSurface,
+    text: AppColors.lightText,
+    textSecondary: AppColors.lightTextSecondary,
+    border: AppColors.lightBorder,
+    error: AppColors.lightError,
+  );
 
   static ThemeData get dark => _build(
-        brightness: Brightness.dark,
-        primary: AppColors.darkPrimary,
-        onPrimary: AppColors.darkOnPrimary,
-        secondary: AppColors.darkSecondary,
-        onSecondary: AppColors.darkOnSecondary,
-        background: AppColors.darkBackground,
-        surface: AppColors.darkSurface,
-        text: AppColors.darkText,
-        textSecondary: AppColors.darkTextSecondary,
-        border: AppColors.darkBorder,
-        error: AppColors.darkError,
-      );
+    brightness: Brightness.dark,
+    primary: AppColors.darkPrimary,
+    onPrimary: AppColors.darkOnPrimary,
+    secondary: AppColors.darkSecondary,
+    onSecondary: AppColors.darkOnSecondary,
+    background: AppColors.darkBackground,
+    surface: AppColors.darkSurface,
+    text: AppColors.darkText,
+    textSecondary: AppColors.darkTextSecondary,
+    border: AppColors.darkBorder,
+    error: AppColors.darkError,
+  );
 
   static ThemeData _build({
     required Brightness brightness,
@@ -77,8 +77,7 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
       fontFamily: fontFamily,
-      textTheme: ThemeData(brightness: brightness)
-          .textTheme
+      textTheme: ThemeData(brightness: brightness).textTheme
           .apply(bodyColor: text, displayColor: text),
       appBarTheme: AppBarTheme(
         backgroundColor: background,
@@ -131,9 +130,7 @@ class AppTheme {
         focusedBorder: inputBorder.copyWith(
           borderSide: BorderSide(color: primary, width: 2),
         ),
-        errorBorder: inputBorder.copyWith(
-          borderSide: BorderSide(color: error),
-        ),
+        errorBorder: inputBorder.copyWith(borderSide: BorderSide(color: error)),
         focusedErrorBorder: inputBorder.copyWith(
           borderSide: BorderSide(color: error, width: 2),
         ),
