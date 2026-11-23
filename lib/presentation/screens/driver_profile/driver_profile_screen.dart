@@ -208,6 +208,7 @@ class _ProfileContent extends StatelessWidget {
     final bloc = context.read<DriverProfileBloc>();
     final plate = await showPlateNumberDialog(
       context,
+      vehicleType: vehicle.vehicleType,
       initialPlate: vehicle.plateNumber,
     );
     if (plate != null) {
@@ -226,7 +227,7 @@ class _ProfileContent extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    final plate = await showPlateNumberDialog(context);
+    final plate = await showPlateNumberDialog(context, vehicleType: type);
     if (plate != null) {
       bloc.add(DriverVehicleAdded(vehicleType: type, plateNumber: plate));
     }

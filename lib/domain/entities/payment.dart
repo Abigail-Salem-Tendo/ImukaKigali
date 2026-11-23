@@ -47,3 +47,23 @@ class Payment extends Equatable {
   @override
   List<Object?> get props => [id, requestId, amount, method, status, paidAt];
 }
+
+/// The ways a client can pay. The payment is simulated, so choosing one
+/// only saves its name in `payments.method`.
+class PaymentMethods {
+  PaymentMethods._();
+
+  static const String mtnMomo = 'mtn_momo';
+  static const String airtelMoney = 'airtel_money';
+  static const String cash = 'cash';
+
+  static const List<String> all = [mtnMomo, airtelMoney, cash];
+
+  /// The name shown to the user, for example "MTN MoMo".
+  static String label(String method) => switch (method) {
+    mtnMomo => 'MTN MoMo',
+    airtelMoney => 'Airtel Money',
+    cash => 'Cash',
+    _ => method,
+  };
+}

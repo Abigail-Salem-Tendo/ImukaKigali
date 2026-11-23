@@ -23,6 +23,25 @@ void main() {
     test('writes plates the standard way', () {
       expect(formatRwandaPlate(' rad428e '), 'RAD 428 E');
       expect(formatRwandaPlate('rc123a'), 'RC 123 A');
+      expect(formatRwandaPlate('rd204e'), 'RD 204 E');
+    });
+
+    test('a moto plate has one letter after the R, a car plate two', () {
+      expect(isValidRwandaPlate('RD 204 E', motoPlate: true), isTrue);
+      expect(isValidRwandaPlate('RAD 428 E', motoPlate: true), isFalse);
+      expect(isValidRwandaPlate('RAD 428 E', motoPlate: false), isTrue);
+      expect(isValidRwandaPlate('RD 204 E', motoPlate: false), isFalse);
+    });
+
+    test('a tricycle needs a moto plate, the other vehicles a car plate', () {
+      final tricycle = VehicleClasses.of(VehicleTypes.tricycle);
+      final pickup = VehicleClasses.of(VehicleTypes.pickup);
+
+      expect(tricycle.acceptsPlate('rd204e'), isTrue);
+      expect(tricycle.acceptsPlate('RAD 428 E'), isFalse);
+      expect(tricycle.plateError, 'Enter a Rwanda plate like RD 204 E.');
+      expect(pickup.acceptsPlate('RD 204 E'), isFalse);
+      expect(pickup.plateExample, 'RAD 428 E');
     });
   });
 
@@ -34,10 +53,7 @@ void main() {
 
     test('every class reads its price from Pricing', () {
       for (final vehicleClass in VehicleClasses.all) {
-        expect(
-          vehicleClass.ratePerMinute,
-          Pricing.ratePerMinute[vehicleClass.type],
-        );
+        expect(vehicleClass.ratePerKm, Pricing.ratePerKm[vehicleClass.type]);
       }
     });
 
@@ -50,12 +66,19 @@ void main() {
       expect(VehicleClasses.of('spaceship').type, VehicleTypes.pickup);
     });
 
-    test('writes capacities and amounts as readable text', () {
+    test('writes capacities as readable text', () {
       expect(VehicleClasses.of(VehicleTypes.tricycle).capacityLabel, '350 kg');
       expect(VehicleClasses.of(VehicleTypes.pickup).capacityLabel, '1.5 t');
       expect(VehicleClasses.of(VehicleTypes.van).capacityLabel, '3 t');
-      expect(formatRwf(24000), '24,000 RWF');
-      expect(formatRwf(400), '400 RWF');
+    });
+
+    test('writes the rate per km with a comma every 3 digits', () {
+      for (final vehicleClass in VehicleClasses.all) {
+        expect(
+          vehicleClass.rateLabel,
+          matches(RegExp(r'^\d{1,3}(,\d{3})* RWF / km$')),
+        );
+      }
     });
   });
 

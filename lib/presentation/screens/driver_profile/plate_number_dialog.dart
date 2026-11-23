@@ -3,24 +3,34 @@ import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
 
 /// Opens a dialog where the driver types a licence plate number.
 /// Returns the plate written the standard way ("RAD 428 E"), or null if
-/// the driver tapped Cancel. [initialPlate] fills the field at the start.
+/// the driver tapped Cancel. [initialPlate] fills the field at the start,
+/// and [vehicleType] decides which kind of plate is accepted.
 Future<String?> showPlateNumberDialog(
   BuildContext context, {
+  required String vehicleType,
   String initialPlate = '',
 }) {
   return showDialog<String>(
     context: context,
-    builder: (_) => _PlateNumberDialog(initialPlate: initialPlate),
+    builder: (_) => _PlateNumberDialog(
+      initialPlate: initialPlate,
+      vehicleClass: VehicleClasses.of(vehicleType),
+    ),
   );
 }
 
 /// The dialog itself. It is a StatefulWidget only because it has to keep
 /// a text controller and a form key alive.
 class _PlateNumberDialog extends StatefulWidget {
-  /// Creates the dialog with the text that fills the field at the start.
-  const _PlateNumberDialog({required this.initialPlate});
+  /// Creates the dialog with the text that fills the field at the start
+  /// and the vehicle the plate belongs to.
+  const _PlateNumberDialog({
+    required this.initialPlate,
+    required this.vehicleClass,
+  });
 
   final String initialPlate;
+  final VehicleClass vehicleClass;
 
   /// Creates the object that holds the controller and the form key.
   @override
@@ -62,13 +72,13 @@ class _PlateNumberDialogState extends State<_PlateNumberDialog> {
           autofocus: true,
           autocorrect: false,
           textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(
-            hintText: 'e.g. RAD 428 E',
-            prefixIcon: Icon(Icons.confirmation_number_outlined),
+          decoration: InputDecoration(
+            hintText: 'e.g. ${widget.vehicleClass.plateExample}',
+            prefixIcon: const Icon(Icons.confirmation_number_outlined),
           ),
-          validator: (value) => isValidRwandaPlate(value ?? '')
+          validator: (value) => widget.vehicleClass.acceptsPlate(value ?? '')
               ? null
-              : 'Enter a Rwanda plate like RAD 428 E.',
+              : widget.vehicleClass.plateError,
           onFieldSubmitted: (_) => _save(),
         ),
       ),
