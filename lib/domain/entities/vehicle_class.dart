@@ -13,6 +13,7 @@ class VehicleClass {
     required this.description,
     required this.capacityKg,
     required this.photo,
+    this.usesMotoPlate = false,
   });
 
   /// One of VehicleTypes.all. This is the string saved in Firestore.
@@ -35,6 +36,22 @@ class VehicleClass {
 
   /// The path of the vehicle's photo inside the app's assets.
   final String photo;
+
+  /// True for a vehicle with a moto plate: R, one letter, 3 digits and a
+  /// letter, such as "RD 204 E". Cars and trucks have two letters after
+  /// the R, such as "RAD 428 E".
+  final bool usesMotoPlate;
+
+  /// An example plate of the right kind for this vehicle, for hints.
+  String get plateExample => usesMotoPlate ? 'RD 204 E' : 'RAD 428 E';
+
+  /// The message shown when a plate of the wrong kind is typed.
+  String get plateError => 'Enter a Rwanda plate like $plateExample.';
+
+  /// Checks that [input] is a plate of the right kind for this vehicle.
+  bool acceptsPlate(String input) {
+    return isValidRwandaPlate(input, motoPlate: usesMotoPlate);
+  }
 
   /// The price per km of road for this vehicle type, read from Pricing.
   /// Returns 0 if the type has no price yet.
@@ -68,6 +85,7 @@ class VehicleClasses {
       description: 'A few items, boxes or a fridge. Agile on Kigali hills.',
       capacityKg: 350,
       photo: 'assets/vehicles/tricycle.jpg',
+      usesMotoPlate: true,
     ),
     VehicleClass(
       type: VehicleTypes.pickup,
@@ -103,21 +121,12 @@ class VehicleClasses {
   static VehicleClass of(String type) {
     return all.firstWhere(
       (vehicleClass) => vehicleClass.type == type,
-      orElse: () => all[1],
+      orElse: () => all.firstWhere(
+        (vehicleClass) => vehicleClass.type == VehicleTypes.pickup,
+      ),
     );
   }
 }
-
-/// The Kigali hubs a driver can work from, and the district each one is in.
-const Map<String, String> kigaliHubDistricts = {
-  'Kimihurura': 'Gasabo',
-  'Remera / Gisimenti': 'Gasabo',
-  'Kacyiru': 'Gasabo',
-  'Nyabugogo': 'Nyarugenge',
-  'Nyamirambo': 'Nyarugenge',
-  'Gikondo': 'Kicukiro',
-  'Kicukiro Centre': 'Kicukiro',
-};
 
 /// Writes an amount of money the Rwandan way: 24000 becomes "24,000 RWF".
 String _formatRwf(int amount) {
@@ -140,11 +149,22 @@ String _compactPlate(String input) {
   return input.replaceAll(RegExp(r'\s+'), '').toUpperCase();
 }
 
-/// Checks that [input] has the shape of a Rwanda plate such as "RAD 428 E".
-/// The shape is: R, then 1 or 2 letters, then 3 digits, then 1 letter.
-/// Spaces and small letters are accepted.
-bool isValidRwandaPlate(String input) {
-  return RegExp(r'^R[A-Z]{1,2}\d{3}[A-Z]$').hasMatch(_compactPlate(input));
+/// Checks that [input] has the shape of a Rwanda plate. Spaces and small
+/// letters are accepted.
+/// - A car or truck plate is R, 2 letters, 3 digits and a letter, such as
+///   "RAD 428 E". Pass [motoPlate] false to accept only this shape.
+/// - A moto or tricycle plate is R, 1 letter, 3 digits and a letter, such
+///   as "RD 204 E". Pass [motoPlate] true to accept only this shape.
+/// When [motoPlate] is null, both shapes are accepted.
+bool isValidRwandaPlate(String input, {bool? motoPlate}) {
+  final plate = _compactPlate(input);
+  final isMoto = RegExp(r'^R[A-Z]\d{3}[A-Z]$').hasMatch(plate);
+  final isCar = RegExp(r'^R[A-Z]{2}\d{3}[A-Z]$').hasMatch(plate);
+  return switch (motoPlate) {
+    true => isMoto,
+    false => isCar,
+    null => isMoto || isCar,
+  };
 }
 
 /// Writes a plate the standard way: "rad428e" becomes "RAD 428 E".
