@@ -64,7 +64,7 @@ class _FindingDriverView extends StatelessWidget {
             if (state.status == FindingDriverStatus.accepted) {
               context.go(AppRoutes.driverContactPath(requestId));
             } else if (state.status == FindingDriverStatus.cancelled) {
-              context.go(AppRoutes.whereFromTo);
+              context.go(AppRoutes.clientHome);
             }
           },
         ),
@@ -93,7 +93,7 @@ class _FindingDriverView extends StatelessWidget {
                       const FindingDriverStarted(),
                     ),
                     secondaryActionLabel: 'Back to start',
-                    onSecondaryAction: () => context.go(AppRoutes.whereFromTo),
+                    onSecondaryAction: () => context.go(AppRoutes.clientHome),
                   );
                 }
                 final request = state.request;

@@ -9,6 +9,7 @@ import 'package:imuka_kigali/presentation/screens/item_details/item_details_scre
 import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_screen.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
+import 'package:imuka_kigali/presentation/screens/client_home/client_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
@@ -61,6 +62,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.settings,
       builder: (_, _) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.clientHome,
+      builder: (_, _) => const ClientHomeScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) => BlocProvider(
