@@ -9,6 +9,7 @@ import 'package:imuka_kigali/presentation/screens/item_details/item_details_scre
 import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/where_from_to_screen.dart';
 import 'package:imuka_kigali/core/router/auth_redirect.dart';
+import 'package:imuka_kigali/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
@@ -43,6 +44,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.verifyEmail,
       builder: (_, _) => const VerifyEmailScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.completeProfile,
+      builder: (_, _) => const CompleteProfileScreen(),
     ),
     GoRoute(
       path: AppRoutes.driverRegister1,
