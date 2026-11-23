@@ -28,7 +28,8 @@ const _driverPages = [
 bool _isClientPage(String location) {
   // Finding-driver paths end with a request id (/finding-driver/abc123),
   // so they are matched by their start, not compared whole.
-  return location == AppRoutes.whereFromTo ||
+  return location == AppRoutes.clientHome ||
+      location == AppRoutes.whereFromTo ||
       location == AppRoutes.itemDetails ||
       location.startsWith(AppRoutes.findingDriverPath(''));
 }
@@ -89,5 +90,5 @@ String homeFor(AuthState auth) {
   if (auth.isDriver) {
     return AppRoutes.driverHome;
   }
-  return AppRoutes.whereFromTo;
+  return AppRoutes.clientHome;
 }

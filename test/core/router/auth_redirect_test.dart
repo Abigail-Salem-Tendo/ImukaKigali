@@ -41,10 +41,10 @@ void main() {
   });
 
   group('signed in', () {
-    test('a client on the login page goes to where-from-to', () {
+    test('a client on the login page goes to client home', () {
       expect(
         authRedirect(_signedInAs(UserRoles.client), AppRoutes.login),
-        AppRoutes.whereFromTo,
+        AppRoutes.clientHome,
       );
     });
 
@@ -76,7 +76,7 @@ void main() {
     test('a client is sent away from driver pages', () {
       expect(
         authRedirect(_signedInAs(UserRoles.client), AppRoutes.driverHome),
-        AppRoutes.whereFromTo,
+        AppRoutes.clientHome,
       );
     });
 
@@ -98,7 +98,7 @@ void main() {
     test('leaves the inbox page once the email is verified', () {
       expect(
         authRedirect(_signedInAs(UserRoles.client), AppRoutes.verifyEmail),
-        AppRoutes.whereFromTo,
+        AppRoutes.clientHome,
       );
     });
   });
