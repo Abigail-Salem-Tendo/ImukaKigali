@@ -97,6 +97,11 @@ class ProfileHeaderCard extends StatelessWidget {
                     ),
                     if (onEditPressed != null)
                       OutlinedButton.icon(
+                        // The app theme makes outlined buttons full width,
+                        // which a button beside the name in a Row cannot be.
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, AppSpacing.buttonHeight),
+                        ),
                         onPressed: onEditPressed,
                         icon: const Icon(Icons.edit_outlined),
                         label: const Text('Edit'),
