@@ -107,6 +107,18 @@ void main() {
       expect(vehicles.updatedVehicles, isEmpty);
       expect(bloc.state.vehicle, pickup);
     });
+
+    test('switching a car plate to a tricycle is refused', () async {
+      await openProfile(pickup);
+
+      bloc.add(const DriverVehicleTypeChanged(VehicleTypes.tricycle));
+      await settle();
+
+      expect(bloc.state.status, DriverProfileStatus.failure);
+      expect(bloc.state.error, contains('RD 204 E'));
+      expect(bloc.state.vehicle, pickup);
+      expect(vehicles.updatedVehicles, isEmpty);
+    });
   });
 
   group('plate number', () {
@@ -131,6 +143,27 @@ void main() {
       expect(bloc.state.error, 'Enter a Rwanda plate like RAD 428 E.');
       expect(bloc.state.vehicle, pickup);
       expect(vehicles.updatedVehicles, isEmpty);
+    });
+
+    test('a tricycle only accepts a moto plate', () async {
+      await openProfile(
+        const Vehicle(
+          id: 'v2',
+          driverId: FakeVehicleRepository.ownerId,
+          vehicleType: VehicleTypes.tricycle,
+          plateNumber: 'RD 204 E',
+          capacityKg: 350,
+        ),
+      );
+
+      bloc.add(const DriverPlateNumberChanged('RAB 123 C'));
+      await settle();
+      expect(bloc.state.error, 'Enter a Rwanda plate like RD 204 E.');
+      expect(vehicles.updatedVehicles, isEmpty);
+
+      bloc.add(const DriverPlateNumberChanged('rf 517 b'));
+      await settle();
+      expect(vehicles.updatedVehicles.single.plateNumber, 'RF 517 B');
     });
 
     test('the same plate typed again saves nothing', () async {
