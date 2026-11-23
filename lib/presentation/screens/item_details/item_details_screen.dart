@@ -89,7 +89,11 @@ class ItemDetailsScreen extends StatelessWidget {
                               amount == null
                                   ? 'Choose a vehicle'
                                   : '${amount.toStringAsFixed(0)} RWF',
-                              style: theme.textTheme.titleLarge,
+                              style: amount == null
+                                  ? theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    )
+                                  : theme.textTheme.titleLarge,
                             ),
                           ],
                         ),
