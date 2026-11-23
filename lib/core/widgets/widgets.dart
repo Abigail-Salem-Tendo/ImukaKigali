@@ -6,6 +6,7 @@ export 'app_card.dart';
 export 'app_snack_bar.dart';
 export 'app_text_field.dart';
 export 'brand_header.dart';
+export 'driver_bottom_nav.dart';
 export 'empty_state.dart';
 export 'loading_view.dart';
 export 'status_chip.dart';

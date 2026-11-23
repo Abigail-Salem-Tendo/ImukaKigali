@@ -4,45 +4,90 @@ import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/open_jobs_bloc.dart';
 
 import '../../helpers/fake_repositories.dart';
+import '../../helpers/fake_vehicle_repository.dart';
 
 void main() {
   late FakeDriverJobRepository jobRepo;
+  late FakeVehicleRepository vehicleRepo;
   late OpenJobsBloc bloc;
+
+  final truck = testVehicle(vehicleType: VehicleTypes.truck);
+  final jobA = testJob(id: 'a', status: RequestStatus.open);
+  final jobB = testJob(id: 'b', status: RequestStatus.open);
 
   setUp(() {
     jobRepo = FakeDriverJobRepository();
-    bloc = OpenJobsBloc(jobRepo);
+    vehicleRepo = FakeVehicleRepository()..stored = testVehicle();
+    bloc = OpenJobsBloc(jobRepo, vehicleRepo);
   });
 
   tearDown(() => bloc.close());
-
-  final jobA = testJob(id: 'a', status: RequestStatus.open);
-  final jobB = testJob(id: 'b', status: RequestStatus.open);
 
   test('starts in the initial state', () {
     expect(bloc.state, const OpenJobsState());
   });
 
-  test('watches open jobs for the vehicle type it is given', () async {
+  test('watches open jobs for the type of my own vehicle', () async {
+    vehicleRepo.stored = truck;
     final states = expectLater(
       bloc.stream,
       emitsInOrder([
         const OpenJobsState(status: OpenJobsStatus.loading),
-        OpenJobsState(status: OpenJobsStatus.success, jobs: [jobA, jobB]),
+        OpenJobsState(
+          status: OpenJobsStatus.success,
+          vehicle: truck,
+          jobs: [jobA, jobB],
+        ),
       ]),
     );
 
-    bloc.add(const OpenJobsStarted(VehicleTypes.truck));
+    bloc.add(const OpenJobsStarted(driverId));
+    await bloc.stream.firstWhere((s) => s.status == OpenJobsStatus.loading);
+    await pumpEventQueue();
     jobRepo.openJobs.add([jobA, jobB]);
 
     await states;
+    expect(vehicleRepo.requestedDriverIds, [driverId]);
     expect(jobRepo.watchedVehicleType, VehicleTypes.truck);
+  });
+
+  test('a driver without a vehicle sees no jobs', () async {
+    vehicleRepo.stored = null;
+
+    bloc.add(const OpenJobsStarted(driverId));
+    final state = await bloc.stream.firstWhere(
+      (s) => s.status != OpenJobsStatus.loading,
+    );
+
+    expect(state.status, OpenJobsStatus.noVehicle);
+    expect(jobRepo.watchedVehicleType, isNull);
+  });
+
+  test('shows the error when the vehicle cannot be loaded', () async {
+    vehicleRepo.getError = 'No internet connection. Please try again.';
+
+    bloc.add(const OpenJobsStarted(driverId));
+    final state = await bloc.stream.firstWhere(
+      (s) => s.status == OpenJobsStatus.failure,
+    );
+
+    expect(state.error, 'No internet connection. Please try again.');
+  });
+
+  test('asks me to sign in again when there is no driver id', () async {
+    bloc.add(const OpenJobsStarted(''));
+    final state = await bloc.stream.first;
+
+    expect(state.status, OpenJobsStatus.failure);
+    expect(state.error, 'Please sign in again to see open jobs');
+    expect(vehicleRepo.requestedDriverIds, isEmpty);
   });
 
   test(
     'a job taken by someone else leaves the list without a refresh',
     () async {
-      bloc.add(const OpenJobsStarted(VehicleTypes.pickup));
+      bloc.add(const OpenJobsStarted(driverId));
+      await pumpEventQueue();
       jobRepo.openJobs.add([jobA, jobB]);
       await bloc.stream.firstWhere((s) => s.jobs.length == 2);
 
@@ -54,7 +99,8 @@ void main() {
   );
 
   test('a new request appears without a refresh', () async {
-    bloc.add(const OpenJobsStarted(VehicleTypes.pickup));
+    bloc.add(const OpenJobsStarted(driverId));
+    await pumpEventQueue();
     jobRepo.openJobs.add([jobA]);
     await bloc.stream.firstWhere((s) => s.status == OpenJobsStatus.success);
 
@@ -65,7 +111,8 @@ void main() {
   });
 
   test('shows the error without the "Exception: " prefix', () async {
-    bloc.add(const OpenJobsStarted(VehicleTypes.pickup));
+    bloc.add(const OpenJobsStarted(driverId));
+    await pumpEventQueue();
     jobRepo.openJobs.addError(Exception('The query requires an index'));
 
     final state = await bloc.stream.firstWhere(
