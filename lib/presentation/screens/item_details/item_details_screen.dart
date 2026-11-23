@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:imuka_kigali/core/constants/app_routes.dart';
-import 'package:imuka_kigali/core/constants/pricing.dart';
 import 'package:imuka_kigali/core/theme/app_spacing.dart';
 import 'package:imuka_kigali/core/widgets/widgets.dart';
 import 'package:imuka_kigali/presentation/screens/login/auth_bloc.dart';
+import 'package:imuka_kigali/domain/entities/vehicle_class.dart';
+import 'package:imuka_kigali/presentation/screens/item_details/vehicle_option_tile.dart';
 import 'package:imuka_kigali/presentation/screens/where_from_to/create_request_bloc.dart';
 
 /// Uses the CreateRequestBloc provided by the ShellRoute in app_router.dart.
 class ItemDetailsScreen extends StatelessWidget {
   const ItemDetailsScreen({super.key});
-
-  static String _label(String type) =>
-      type[0].toUpperCase() + type.substring(1);
 
   @override
   Widget build(BuildContext context) {
@@ -69,18 +67,16 @@ class ItemDetailsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     Text('Vehicle', style: theme.textTheme.titleSmall),
                     const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      children: [
-                        for (final type in VehicleTypes.all)
-                          ChoiceChip(
-                            label: Text(_label(type)),
-                            selected: state.vehicleType == type,
-                            onSelected: (_) =>
-                                bloc.add(VehicleTypeSelected(type)),
-                          ),
-                      ],
-                    ),
+                    for (final vehicleClass in VehicleClasses.all)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: VehicleOptionTile(
+                          vehicleClass: vehicleClass,
+                          selected: state.vehicleType == vehicleClass.type,
+                          onTap: () =>
+                              bloc.add(VehicleTypeSelected(vehicleClass.type)),
+                        ),
+                      ),
                     const SizedBox(height: AppSpacing.lg),
                     Card(
                       child: Padding(
@@ -93,7 +89,11 @@ class ItemDetailsScreen extends StatelessWidget {
                               amount == null
                                   ? 'Choose a vehicle'
                                   : '${amount.toStringAsFixed(0)} RWF',
-                              style: theme.textTheme.titleLarge,
+                              style: amount == null
+                                  ? theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    )
+                                  : theme.textTheme.titleLarge,
                             ),
                           ],
                         ),

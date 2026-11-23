@@ -14,6 +14,7 @@ import 'package:imuka_kigali/presentation/screens/complete_profile/complete_prof
 import 'package:imuka_kigali/presentation/screens/create_account/create_account_screen.dart';
 import 'package:imuka_kigali/presentation/screens/delivery_handshake_payment/delivery_handshake_payment_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_contact/driver_contact_screen.dart';
+import 'package:imuka_kigali/presentation/screens/driver_home/driver_home_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_jobs/driver_jobs_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_partner_registration/driver_partner_registration_screen.dart';
 import 'package:imuka_kigali/presentation/screens/driver_profile/driver_profile_screen.dart';
@@ -92,7 +93,10 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           FindingDriverScreen(requestId: state.pathParameters['requestId']!),
     ),
-    _placeholder(AppRoutes.driverHome, 'Driver home'),
+    GoRoute(
+      path: AppRoutes.driverHome,
+      builder: (_, _) => const DriverHomeScreen(),
+    ),
     GoRoute(
       path: AppRoutes.driverJobs,
       builder: (_, _) => const DriverJobsScreen(),
@@ -126,25 +130,4 @@ Widget _buildDriverRegister2(BuildContext context, GoRouterState state) {
     return DriverRegistrationStep2Screen(bloc: bloc);
   }
   return const DriverRegistrationStep1Screen();
-}
-
-GoRoute _placeholder(String path, String title) {
-  return GoRoute(
-    path: path,
-    builder: (context, state) => _PlaceholderScreen(title: title),
-  );
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text(title)),
-    );
-  }
 }

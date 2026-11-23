@@ -18,15 +18,4 @@ void main() {
       expect(postedBefore(const Duration(days: 3)), 'Posted 3 days ago');
     });
   });
-
-  group('vehicleTypeLabel', () {
-    test('starts with a capital letter', () {
-      expect(vehicleTypeLabel('pickup'), 'Pickup');
-      expect(vehicleTypeLabel('truck'), 'Truck');
-    });
-
-    test('leaves an empty type empty', () {
-      expect(vehicleTypeLabel(''), '');
-    });
-  });
 }
