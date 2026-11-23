@@ -64,7 +64,9 @@ class AppView extends StatelessWidget {
     // or out doesn't navigate, so we ask it to check again ourselves.
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
-          previous.status != current.status || previous.user != current.user,
+          previous.status != current.status ||
+          previous.user != current.user ||
+          previous.emailVerified != current.emailVerified,
       listener: (context, state) => appRouter.refresh(),
       child: MaterialApp.router(
         title: 'Imuka Kigali',

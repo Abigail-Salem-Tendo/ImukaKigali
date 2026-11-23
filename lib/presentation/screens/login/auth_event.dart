@@ -59,3 +59,13 @@ class PasswordResetRequested extends AuthEvent {
 class LogoutRequested extends AuthEvent {
   const LogoutRequested();
 }
+
+/// The user tapped "I've verified" after clicking the link in the email.
+class EmailVerificationCheckRequested extends AuthEvent {
+  const EmailVerificationCheckRequested();
+}
+
+/// The user tapped "Resend email".
+class VerificationEmailResent extends AuthEvent {
+  const VerificationEmailResent();
+}

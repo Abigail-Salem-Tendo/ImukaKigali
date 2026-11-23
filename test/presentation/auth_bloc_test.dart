@@ -20,6 +20,8 @@ class FakeAuthRepository implements AuthRepository {
   String? failWith;
   int signOutCalls = 0;
   String? resetEmail;
+  bool verified = false;
+  int verificationEmailsSent = 0;
 
   void _maybeFail() {
     if (failWith != null) throw Exception(failWith);
@@ -66,6 +68,15 @@ class FakeAuthRepository implements AuthRepository {
     _maybeFail();
     resetEmail = email;
   }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    _maybeFail();
+    verificationEmailsSent++;
+  }
+
+  @override
+  Future<bool> isEmailVerified() async => verified;
 
   @override
   Future<void> signOut() async {
@@ -170,5 +181,42 @@ void main() {
     );
     expect(repo.signOutCalls, 1);
     expect(bloc.state.user, isNull);
+  });
+
+  group('email verification', () {
+    test('login reads whether the email is verified', () async {
+      repo.verified = true;
+      bloc.add(const LoginSubmitted(email: 'diane@example.com', password: 'x'));
+      final done = await bloc.stream.firstWhere(
+        (s) => s.status == AuthStatus.authenticated,
+      );
+      expect(done.emailVerified, isTrue);
+    });
+
+    test('"I\'ve verified" after clicking the link → verified', () async {
+      repo.verified = true;
+      bloc.add(const EmailVerificationCheckRequested());
+      final done = await bloc.stream.firstWhere((s) => !s.isLoading);
+      expect(done.emailVerified, isTrue);
+      expect(done.error, isNull);
+    });
+
+    test('"I\'ve verified" without clicking the link → error', () async {
+      bloc.add(const EmailVerificationCheckRequested());
+      final done = await bloc.stream.firstWhere((s) => !s.isLoading);
+      expect(done.emailVerified, isFalse);
+      expect(done.error, contains('Not verified yet'));
+    });
+
+    test('resend sends a new email and shows a message', () async {
+      repo.signedIn = _client;
+      bloc.add(const AuthCheckRequested());
+      await bloc.stream.firstWhere((s) => s.status == AuthStatus.authenticated);
+
+      bloc.add(const VerificationEmailResent());
+      final done = await bloc.stream.firstWhere((s) => s.message != null);
+      expect(repo.verificationEmailsSent, 1);
+      expect(done.message, contains('diane@example.com'));
+    });
   });
 }
