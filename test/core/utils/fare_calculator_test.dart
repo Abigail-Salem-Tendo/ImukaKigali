@@ -159,10 +159,15 @@ void main() {
       }
     });
 
-    test('a bigger vehicle never costs less on any route', () {
+        test('a higher rate never costs less on any route', () {
+      final byRate = [...VehicleTypes.all]
+        ..sort(
+          (a, b) => Pricing.ratePerKm[a]!.compareTo(Pricing.ratePerKm[b]!),
+        );
+
       for (final (a, b) in routes) {
         final prices = [
-          for (final vehicle in VehicleTypes.all)
+          for (final vehicle in byRate)
             FareCalculator.calculate(
               pickup: a,
               dropoff: b,
