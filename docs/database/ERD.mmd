@@ -1,0 +1,61 @@
+erDiagram
+    USERS ||--o| VEHICLES : owns
+    USERS ||--o{ REQUESTS : creates
+    USERS |o--o{ REQUESTS : drives
+    USERS ||--o{ RATINGS : gives
+    USERS ||--o{ RATINGS : receives
+    REQUESTS ||--o| PAYMENTS : has
+    REQUESTS ||--o| RATINGS : has
+
+    USERS {
+        string uid PK
+        string role
+        string fullName
+        string phone
+        string email
+        string district
+        timestamp createdAt
+    }
+
+    VEHICLES {
+        string id PK
+        string driverId FK
+        string vehicleType
+        string plateNumber
+        float capacityKg
+    }
+
+    REQUESTS {
+        string id PK
+        string clientId FK
+        string driverId FK
+        string pickupLocation
+        string dropoffLocation
+        string itemDescription
+        string vehicleType
+        int estimatedMinutes
+        float proposedAmount
+        string status
+        boolean clientConfirmed
+        boolean driverConfirmed
+        timestamp createdAt
+    }
+
+    PAYMENTS {
+        string id PK
+        string requestId FK
+        float amount
+        string method
+        string status
+        timestamp paidAt
+    }
+
+    RATINGS {
+        string id PK
+        string requestId FK
+        string clientId FK
+        string driverId FK
+        int stars
+        string comment
+        timestamp createdAt
+    }
