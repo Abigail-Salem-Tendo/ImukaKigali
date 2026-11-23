@@ -161,7 +161,9 @@ class VehicleTypeIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final icon = switch (vehicleClass.type) {
+      VehicleTypes.car => Icons.directions_car,
       VehicleTypes.tricycle => Icons.two_wheeler,
+      VehicleTypes.hilux => Icons.airport_shuttle,
       VehicleTypes.pickup => Icons.airport_shuttle,
       VehicleTypes.van => Icons.local_shipping,
       _ => Icons.local_shipping_outlined,
