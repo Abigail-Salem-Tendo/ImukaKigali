@@ -67,7 +67,7 @@ void fillValidForm(DriverRegistrationBloc bloc) {
       ),
     )
     ..add(const RegistrationHubToggled('Kimihurura'))
-    ..add(const RegistrationHubToggled('Nyabugogo'))
+    ..add(const RegistrationHubToggled('Nyamirambo'))
     ..add(const RegistrationVehicleTypeSelected(VehicleTypes.pickup))
     ..add(
       const RegistrationFieldChanged(RegistrationField.plateNumber, 'rad428e'),
@@ -296,10 +296,10 @@ void main() {
       );
     });
 
-    test('uses the district of the first hub as the base district', () {
+    test('uses the district of the first sector as the base district', () {
       expect(
         const DriverRegistrationState(
-          operatingHubs: ['Nyabugogo', 'Kimihurura'],
+          operatingHubs: ['Nyamirambo', 'Kimihurura'],
         ).baseDistrict,
         'Nyarugenge',
       );
@@ -324,6 +324,23 @@ void main() {
           plateNumber: 'RAD 428 E',
         ).isStep2Valid,
         isTrue,
+      );
+    });
+
+    test('a tricycle needs a moto plate like RD 204 E', () {
+      expect(
+        const DriverRegistrationState(
+          vehicleType: VehicleTypes.tricycle,
+          plateNumber: 'RAD 428 E',
+        ).plateNumberError,
+        'Enter a Rwanda plate like RD 204 E.',
+      );
+      expect(
+        const DriverRegistrationState(
+          vehicleType: VehicleTypes.tricycle,
+          plateNumber: 'RD 204 E',
+        ).plateNumberError,
+        isNull,
       );
     });
   });
